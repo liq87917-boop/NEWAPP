@@ -54,11 +54,13 @@ class ControlPlaneContractTests(unittest.TestCase):
         self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
         self.assertTrue(path_matches("./.ai/generated/evidence.json", [".ai/generated/**"]))
 
-    def test_github_relay_is_private_pr_only(self) -> None:
+    def test_github_relay_uses_private_git_transport_without_gh_requirement(self) -> None:
         settings = config()["github_relay"]
         self.assertTrue(settings["enabled"])
         self.assertTrue(settings["require_private"])
-        self.assertTrue(settings["require_pull_request"])
+        self.assertFalse(settings["require_pull_request"])
+        self.assertFalse(settings["require_github_cli"])
+        self.assertEqual("git_ssh", settings["transport"])
         self.assertEqual("main", settings["base_branch"])
 
 
