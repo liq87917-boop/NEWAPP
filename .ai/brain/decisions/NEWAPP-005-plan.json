@@ -1,0 +1,20 @@
+{
+  "task_id": "NEWAPP-005",
+  "decision": "execute",
+  "rationale": "After NEWAPP-003 identifies the actual shared NEWERP keys, reconcile the proposed NEWAPP DDL and repository mappings against those real types without changing the shared database. This is a design/test-artifact task only; any actual schema application remains separately gated.",
+  "validation_focus": [
+    "Do not execute DDL or DML against the shared NEWERP database.",
+    "Map neutral CustomerKey, SupplierKey, UserKey and TenantId references to the actual types documented by NEWAPP-003.",
+    "Prefer direct FK/view/repository mapping to existing NEWERP master data; never create duplicate Customer/Supplier master tables.",
+    "Produce a reviewable migration plan, rollback notes and disposable/test-database validation where available.",
+    "Any operation that would alter shared database structure must stop at the Human Gate and must not be executed by this task."
+  ],
+  "risks": [
+    "The task is dependency-blocked until NEWAPP-003 is completed and its schema map is accepted.",
+    "No destructive migration, DROP/TRUNCATE, production DML, or production deployment is allowed.",
+    "Do not guess missing key types; preserve unresolved mappings explicitly."
+  ],
+  "actor": "Codex GPT Hourly Rolling Planner",
+  "source": "hourly_gpt_control_plane_planner",
+  "recorded_at": "2026-09-23T12:58:30Z"
+}
