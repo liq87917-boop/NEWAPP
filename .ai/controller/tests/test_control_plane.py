@@ -9,7 +9,7 @@ if str(CONTROLLER) not in sys.path:
     sys.path.insert(0, str(CONTROLLER))
 
 from task_loader import QueueResult, load_tasks, queue_head, requires_human_gate
-from common import config
+from common import config, path_matches
 
 
 class ControlPlaneContractTests(unittest.TestCase):
@@ -46,6 +46,13 @@ class ControlPlaneContractTests(unittest.TestCase):
         settings = config()["brain"]
         self.assertEqual("codex_remote_file_bridge", settings["mode"])
         self.assertFalse(settings["api_key_required"])
+
+    def test_executor_is_explicitly_pinned_to_deepseek(self) -> None:
+        self.assertEqual("deepseek", config()["runtime"]["cline_provider"])
+
+    def test_hidden_control_artifact_matches_allowed_path(self) -> None:
+        self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
+        self.assertTrue(path_matches("./.ai/generated/evidence.json", [".ai/generated/**"]))
 
     def test_github_relay_is_private_pr_only(self) -> None:
         settings = config()["github_relay"]

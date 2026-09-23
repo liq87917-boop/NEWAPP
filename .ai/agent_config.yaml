@@ -17,6 +17,7 @@
     "max_attempts_per_task": 3,
     "cline_timeout_seconds": 3600,
     "cline_command": "cline",
+    "cline_provider": "deepseek",
     "require_git": true,
     "require_baseline_commit": true,
     "auto_commit_after_acceptance": true,

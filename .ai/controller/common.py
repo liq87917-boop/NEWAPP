@@ -123,7 +123,9 @@ def git(args: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 def path_matches(path: str, patterns: Iterable[str]) -> bool:
-    normalized = path.replace("\\", "/").lstrip("./")
+    normalized = path.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
     return any(fnmatch.fnmatch(normalized.lower(), pattern.replace("\\", "/").lower()) for pattern in patterns)
 
 
