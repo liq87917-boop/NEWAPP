@@ -1,0 +1,350 @@
+{
+  "task_id": "NEWAPP-001",
+  "task_title": "Freeze repository baseline and secret rules",
+  "task_phase": "P0",
+  "artifact": "repository_baseline_report",
+  "generated_at": "2026-09-23T11:01:18.846911Z",
+  "generated_by": "newapp_executor (Cline/DeepSeek)",
+  "completion_authority": "GPT brain final review; this artifact is evidence only",
+  "executor_payload_received": false,
+  "payload_reconstruction": {
+    "controller_payload_section_present": false,
+    "sources": [
+      "docs/NEWAPP_TASKS_V1.yaml#NEWAPP-001",
+      ".ai/brain/decisions/NEWAPP-001-plan.json",
+      ".ai/agent_config.yaml#paths.executor_allowed"
+    ],
+    "note": "Task identity, GPT plan and allowed paths were read from the controller-owned records listed in sources. No queue, approval, branch or state file was written by the executor."
+  },
+  "controller": {
+    "available": true,
+    "phase": "failed",
+    "run_id": "20260923T104246927931Z-78cb8b29",
+    "branch": "agent/newapp-001-78cb8b29",
+    "task_status": "failed"
+  },
+  "git": {
+    "repository_present": true,
+    "baseline_commit_present": true,
+    "head_commit": "dd5ecfb39f651221064e7554558bc2bf4c7e7c55",
+    "branch": "agent/newapp-001-78cb8b29",
+    "tracked_file_count": 40
+  },
+  "environment_file": {
+    "path_label": ".env",
+    "exists_locally": true,
+    "ignored_by_git": true,
+    "tracked_by_git": false,
+    "content_read": false
+  },
+  "gitignore_coverage": {
+    "gitignore_present": true,
+    "required_patterns": [
+      ".env",
+      ".env.*",
+      "agent.env",
+      "agent.env.*",
+      "*.pfx",
+      "*.p12",
+      "*.jks",
+      "*.keystore",
+      "*.mobileprovision",
+      "*.pem",
+      "*.key",
+      "secrets/",
+      "exports/",
+      "temp/"
+    ],
+    "missing_patterns": [],
+    "covered_count": 14,
+    "required_count": 14
+  },
+  "repository_rules": {
+    "files": [
+      {
+        "path": ".clinerules",
+        "exists": true,
+        "sha256": "f7e28836db8406b1b4ec7e2a6c8abc2cb477968037359748a6527d99ef59a245",
+        "missing_markers": [],
+        "separation_confirmed": true
+      },
+      {
+        "path": ".ai/EXECUTOR_RULES.md",
+        "exists": true,
+        "sha256": "107ddaf5d0310e6920d233e9cadabb5085f87923bc0bdc067ce6b50ee6744949",
+        "missing_markers": [],
+        "separation_confirmed": true
+      },
+      {
+        "path": ".ai/BRAIN_RULES.md",
+        "exists": true,
+        "sha256": "c02a8e2117fc922663c836706df273fcb435353e7e9f3e0f39ca6162f61d4171",
+        "missing_markers": [],
+        "separation_confirmed": true
+      },
+      {
+        "path": ".github/workflows/control-plane.yml",
+        "exists": true,
+        "sha256": "7775bdbd8f8efe8e7448eeea3b055513e74be182503cc3e8e7fbfd5e1de10af0",
+        "missing_markers": [],
+        "separation_confirmed": true
+      }
+    ],
+    "all_separation_confirmed": true
+  },
+  "secret_scan": {
+    "scope": "git_tracked_files",
+    "tracked_file_count": 40,
+    "files_scanned": 38,
+    "scanned_paths": [
+      ".ai/BRAIN_RULES.md",
+      ".ai/EXECUTOR_RULES.md",
+      ".ai/agent_config.yaml",
+      ".ai/audit.jsonl",
+      ".ai/brain/decisions/.gitkeep",
+      ".ai/brain/decisions/NEWAPP-001-plan.json",
+      ".ai/brain/requests/.gitkeep",
+      ".ai/brain/requests/NEWAPP-001-plan-request.json",
+      ".ai/controller/__init__.py",
+      ".ai/controller/agent_loop.py",
+      ".ai/controller/browser_acceptance.py",
+      ".ai/controller/cline_executor.py",
+      ".ai/controller/common.py",
+      ".ai/controller/evidence.py",
+      ".ai/controller/git_manager.py",
+      ".ai/controller/github_relay.py",
+      ".ai/controller/gpt_brain.py",
+      ".ai/controller/task_loader.py",
+      ".ai/controller/tests/test_control_plane.py",
+      ".ai/controller/validator.py",
+      ".ai/decisions/.gitkeep",
+      ".ai/evidence/.gitkeep",
+      ".ai/generated/.gitkeep",
+      ".ai/locks/.gitkeep",
+      ".ai/logs/.gitkeep",
+      ".ai/project_state.json",
+      ".ai/screenshots/.gitkeep",
+      ".ai/templates/executor_report.json",
+      ".clinerules",
+      ".github/workflows/control-plane.yml",
+      ".gitignore",
+      "AUTOMATION_README.md",
+      "docs/NEWAPP_Database_DDL_V1.sql",
+      "docs/NEWAPP_OpenAPI_V1.yaml",
+      "docs/NEWAPP_TASKS_V1.yaml",
+      "docs/README_交付与启动说明.md",
+      "requirements-agent.txt",
+      "start_agent.bat"
+    ],
+    "files_skipped_binary": [
+      "docs/NEWAPP_UI页面原型与交互说明_V1.0.docx",
+      "docs/义乌小商品外贸智能询价APP_产品技术规划方案_V1.1.docx"
+    ],
+    "files_skipped_large": [],
+    "files_missing_on_disk": [],
+    "content_rules": [
+      {
+        "id": "private_key_block",
+        "description": "PEM private key block header"
+      },
+      {
+        "id": "known_token_prefix",
+        "description": "Cloud or provider credential with a known literal prefix"
+      },
+      {
+        "id": "jwt_like_literal",
+        "description": "JWT-shaped literal"
+      },
+      {
+        "id": "credential_assignment",
+        "description": "Credential keyword assigned a non-placeholder value"
+      }
+    ],
+    "path_rules": [
+      ".env",
+      ".env.*",
+      "agent.env",
+      "agent.env.*",
+      "*.pfx",
+      "*.p12",
+      "*.jks",
+      "*.keystore",
+      "*.pem",
+      "*.key",
+      "*.ppk",
+      "*.p8",
+      "*.mobileprovision",
+      "*id_rsa*",
+      "*id_ed25519*",
+      "*.npmrc",
+      "*.netrc",
+      "*.pgpass",
+      "*secrets/*",
+      "*secret/*",
+      "*credential*.json",
+      "*credentials*.txt"
+    ],
+    "findings_count": 0,
+    "findings": [],
+    "values_recorded": false,
+    "status": "passed"
+  },
+  "policy": {
+    "available": true,
+    "protected_path_pattern_count": 19,
+    "executor_allowed_paths": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "database/**",
+      ".github/**",
+      ".ai/generated/**",
+      "*.sln",
+      "*.md",
+      ".gitignore"
+    ],
+    "human_gate_task_ids": [
+      "NEWAPP-009",
+      "NEWAPP-060",
+      "NEWAPP-066",
+      "NEWAPP-067",
+      "NEWAPP-068"
+    ],
+    "forbidden_even_with_approval": [
+      "drop",
+      "truncate",
+      "destructive migration",
+      "production dml",
+      "production deployment"
+    ]
+  },
+  "artifacts": {
+    "reports": [
+      ".ai/generated/NEWAPP-001-baseline-report.json",
+      "docs/NEWAPP-001-baseline-report.json"
+    ],
+    "executor_paths": [
+      ".ai/generated/NEWAPP-001-baseline-report.json",
+      "docs/NEWAPP-001-baseline-report.json",
+      "docs/REPOSITORY_BASELINE.md",
+      "tests/__init__.py",
+      "tests/baseline/__init__.py",
+      "tests/baseline/secret_scan.py",
+      "tests/baseline/repository_baseline.py",
+      "tests/baseline/test_secret_scan.py",
+      "tests/baseline/test_repository_baseline.py"
+    ]
+  },
+  "path_guard_compatibility": {
+    "allowed_patterns_source": ".ai/agent_config.yaml#paths.executor_allowed",
+    "normalization": "common.path_matches applies path.replace('\\\\','/') and removes only exact leading './' prefixes before fnmatch, so dot-directory patterns are preserved",
+    "paths": [
+      {
+        "path": ".ai/generated/NEWAPP-001-baseline-report.json",
+        "normalized_for_guard": ".ai/generated/newapp-001-baseline-report.json",
+        "accepted": true,
+        "matched_patterns": [
+          ".ai/generated/**"
+        ]
+      },
+      {
+        "path": "docs/NEWAPP-001-baseline-report.json",
+        "normalized_for_guard": "docs/newapp-001-baseline-report.json",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**"
+        ]
+      },
+      {
+        "path": "docs/REPOSITORY_BASELINE.md",
+        "normalized_for_guard": "docs/repository_baseline.md",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**",
+          "*.md"
+        ]
+      },
+      {
+        "path": "tests/__init__.py",
+        "normalized_for_guard": "tests/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/baseline/__init__.py",
+        "normalized_for_guard": "tests/baseline/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/baseline/secret_scan.py",
+        "normalized_for_guard": "tests/baseline/secret_scan.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/baseline/repository_baseline.py",
+        "normalized_for_guard": "tests/baseline/repository_baseline.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/baseline/test_secret_scan.py",
+        "normalized_for_guard": "tests/baseline/test_secret_scan.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/baseline/test_repository_baseline.py",
+        "normalized_for_guard": "tests/baseline/test_repository_baseline.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      }
+    ],
+    "all_paths_accepted": true
+  },
+  "unresolved_issues": [],
+  "acceptance_evidence": [
+    {
+      "criterion": ".env remains present locally and untracked.",
+      "evidence": "git check-ignore and git ls-files --error-unmatch evaluated on the path label only",
+      "satisfied": true
+    },
+    {
+      "criterion": "Secret scanner on tracked files reports no credentials.",
+      "evidence": "tests/baseline/secret_scan.py over 40 tracked files",
+      "satisfied": true
+    },
+    {
+      "criterion": "Repository rules state the GPT brain / executor separation.",
+      "evidence": "repository_rules.files markers per rule file",
+      "satisfied": true
+    }
+  ],
+  "reproduce": {
+    "secret_scan": "python tests/baseline/secret_scan.py --json",
+    "baseline_report": "python tests/baseline/repository_baseline.py --write",
+    "unit_tests": "python -m unittest discover -s tests -p \"test_*.py\""
+  },
+  "limitations": [
+    "The scanner covers Git tracked files only; ignored local files such as .env are out of scope because they must never be committed.",
+    "Binary files and files larger than the scanner limit are reported by name and not parsed.",
+    "A high-entropy secret with no keyword, no known prefix and no credential-like file name cannot be detected by pattern scanning.",
+    "Documentation placeholders and template references are intentionally not reported as credentials.",
+    ".env is verified by path and Git status only: this report never reads, hashes or echoes .env."
+  ],
+  "secret_values_included": false,
+  "status": "evidence_collected"
+}
