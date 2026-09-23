@@ -1,0 +1,19 @@
+{
+  "task_id": "NEWAPP-006",
+  "decision": "execute",
+  "rationale": "Validate and document the existing NEWAPP status console and rolling control-plane behavior. The protected launcher/controller already exists; the executor should add only allowed-path tests/docs/evidence proving it reports Git, queue, validation and blockers correctly.",
+  "validation_focus": [
+    "Do not edit start_agent.bat, .ai/controller/**, .ai/agent_config.yaml or other protected control-plane paths.",
+    "Add focused tests or safe diagnostics under tests/** and documentation under docs/** for status/preflight/rolling queue behavior.",
+    "Verify preflight is read-only and status data is machine-readable without secret values.",
+    "Verify pending GPT review does not globally block an unrelated dependency-safe task."
+  ],
+  "risks": [
+    "Do not weaken Human Gates or dependency rules.",
+    "Do not expose .env values in status output or evidence.",
+    "If an acceptance point requires a protected-path change, report it instead of editing the protected path."
+  ],
+  "actor": "Codex GPT Hourly Rolling Planner",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T12:00:00Z"
+}
