@@ -51,11 +51,11 @@ echo [OK] Controller: .ai\controller\agent_loop.py
 echo.
 
 if "%~1"=="" (
-  echo No command supplied. Running safe preflight only.
-  echo To start the development loop use:
-  echo   start_agent.bat run
+  echo No command supplied. Starting unattended rolling development.
+  echo For a read-only environment check use:
+  echo   start_agent.bat preflight
   echo.
-  %PYTHON% ".ai\controller\agent_loop.py" preflight
+  %PYTHON% ".ai\controller\agent_loop.py" run
 ) else (
   echo Command: %*
   echo.
@@ -70,9 +70,9 @@ echo ------------------------------------------------------------
 echo NEWAPP control plane exited with code %EXITCODE%.
 echo ------------------------------------------------------------
 
-rem When launched by double-click with no arguments, keep the window open
-rem so startup/preflight errors can actually be read. Calls with explicit
-rem commands remain non-interactive for scripts and automation.
+rem When launched by double-click with no arguments, the rolling agent normally
+rem stays alive. If it exits because of a real blocker, keep the window open so
+rem the failure remains visible. Explicit command calls stay non-interactive.
 if "%~1"=="" (
   echo.
   echo Press any key to close this window.
