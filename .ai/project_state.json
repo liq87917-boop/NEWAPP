@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "NEWAPP",
+  "controller": "gpt_brain_cline_executor",
+  "phase": "preflight",
+  "paused": false,
+  "pause_reason": null,
+  "current_task": null,
+  "last_completed_task": null,
+  "last_run_id": null,
+  "blocker": null,
+  "task_statuses": {},
+  "last_validation": null,
+  "last_review": null,
+  "updated_at": null
+}
+

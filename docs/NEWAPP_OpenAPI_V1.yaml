@@ -1,0 +1,1012 @@
+openapi: 3.0.3
+info:
+  title: NEWAPP Mobile Workspace API
+  version: 1.0.0
+  description: |
+    NEWAPP 是 NEWERP 的移动端工作台。两者共享同一物理 SQL Server 数据库与同一 OSS，
+    但移动客户端不得直连数据库或持有 OSS 长期密钥。API 服务从 D:\VSCodeProject\NEWAPP\.env
+    读取数据库/OSS配置；客户端仅使用 HTTPS API 和短期上传凭证。
+servers:
+  - url: https://api.example.com/newapp/v1
+    description: Production placeholder - configured by environment
+  - url: http://localhost:5080/api/v1
+    description: Local development
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Bootstrap
+  - name: Customers
+  - name: Suppliers
+  - name: Trips
+  - name: Visits
+  - name: InquiryItems
+  - name: Files
+  - name: AI
+  - name: Translation
+  - name: Export
+  - name: Sync
+  - name: Agent
+paths:
+  /auth/password/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: Account/password login
+      operationId: loginByPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PasswordLoginRequest'}
+      responses:
+        '200': {$ref: '#/components/responses/AuthSuccess'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /auth/sms/send:
+    post:
+      security: []
+      tags: [Auth]
+      summary: Send SMS code
+      operationId: sendSmsCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, purpose]
+              properties:
+                phone: {type: string}
+                purpose: {type: string, enum: [login, register, bind]}
+      responses:
+        '204': {description: Sent or intentionally indistinguishable}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /auth/sms/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: SMS code login
+      operationId: loginBySms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone: {type: string}
+                code: {type: string}
+      responses:
+        '200': {$ref: '#/components/responses/AuthSuccess'}
+  /auth/wechat/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: WeChat OAuth login
+      operationId: loginByWechat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: {type: string}
+      responses:
+        '200': {$ref: '#/components/responses/AuthSuccess'}
+  /auth/apple/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: Sign in with Apple
+      operationId: loginByApple
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identityToken, authorizationCode]
+              properties:
+                identityToken: {type: string}
+                authorizationCode: {type: string}
+      responses:
+        '200': {$ref: '#/components/responses/AuthSuccess'}
+  /auth/device-number/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: Carrier one-tap phone-number login
+      operationId: loginByDeviceNumber
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [providerToken]
+              properties:
+                providerToken: {type: string}
+                provider: {type: string}
+      responses:
+        '200': {$ref: '#/components/responses/AuthSuccess'}
+  /auth/register:
+    post:
+      security: []
+      tags: [Auth]
+      summary: Register with optional/required invite code
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RegisterRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/AuthSuccess'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /bootstrap:
+    get:
+      tags: [Bootstrap]
+      summary: "App bootstrap: user, tenant theme, dictionaries, feature flags, permissions"
+      operationId: getBootstrap
+      responses:
+        '200':
+          description: Bootstrap payload
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/BootstrapResponse'}
+  /customers:
+    get:
+      tags: [Customers]
+      summary: List customers in current user's allowed group scope
+      operationId: listCustomers
+      parameters:
+        - {$ref: '#/components/parameters/Search'}
+        - {$ref: '#/components/parameters/Cursor'}
+        - {$ref: '#/components/parameters/PageSize'}
+      responses:
+        '200':
+          description: Customer page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CustomerPage'}
+    post:
+      tags: [Customers]
+      summary: Create customer in shared ERP business data
+      operationId: createCustomer
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CustomerUpsert'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Customer'}
+  /customers/{customerKey}:
+    parameters:
+      - {$ref: '#/components/parameters/CustomerKey'}
+    get:
+      tags: [Customers]
+      operationId: getCustomer
+      summary: Get a customer within data scope
+      responses:
+        '200': {description: OK, content: {application/json: {schema: {$ref: '#/components/schemas/Customer'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Customers]
+      operationId: updateCustomer
+      summary: Update shared customer + mobile extension fields
+      parameters: [{$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CustomerUpsert'}
+      responses:
+        '200': {description: Updated, content: {application/json: {schema: {$ref: '#/components/schemas/Customer'}}}}
+        '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [Customers]
+      operationId: deleteCustomer
+      summary: Soft delete when user has permission
+      responses:
+        '204': {description: Soft deleted}
+  /suppliers:
+    get:
+      tags: [Suppliers]
+      summary: List suppliers visible to all users in current tenant
+      operationId: listSuppliers
+      parameters:
+        - {$ref: '#/components/parameters/Search'}
+        - {$ref: '#/components/parameters/Cursor'}
+        - {$ref: '#/components/parameters/PageSize'}
+      responses:
+        '200':
+          description: Supplier page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SupplierPage'}
+    post:
+      tags: [Suppliers]
+      summary: Create supplier in shared ERP business data
+      operationId: createSupplier
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SupplierUpsert'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/Supplier'}}}}
+  /suppliers/{supplierKey}:
+    parameters:
+      - {$ref: '#/components/parameters/SupplierKey'}
+    get:
+      tags: [Suppliers]
+      operationId: getSupplier
+      responses:
+        '200': {description: OK, content: {application/json: {schema: {$ref: '#/components/schemas/Supplier'}}}}
+    patch:
+      tags: [Suppliers]
+      operationId: updateSupplier
+      parameters: [{$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SupplierUpsert'}
+      responses:
+        '200': {description: Updated, content: {application/json: {schema: {$ref: '#/components/schemas/Supplier'}}}}
+    delete:
+      tags: [Suppliers]
+      operationId: deleteSupplier
+      responses:
+        '204': {description: Soft deleted}
+  /inquiry-trips:
+    get:
+      tags: [Trips]
+      summary: List current user's inquiry trips
+      operationId: listTrips
+      parameters:
+        - in: query
+          name: date
+          schema: {type: string, format: date}
+        - {$ref: '#/components/parameters/Cursor'}
+      responses:
+        '200': {description: OK}
+    post:
+      tags: [Trips]
+      summary: Start a customer inquiry trip
+      operationId: createTrip
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customerKey]
+              properties:
+                customerKey: {type: string}
+                note: {type: string, nullable: true}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/InquiryTrip'}}}}
+  /inquiry-trips/{tripId}:
+    parameters:
+      - {$ref: '#/components/parameters/TripId'}
+    get:
+      tags: [Trips]
+      operationId: getTrip
+      responses:
+        '200': {description: OK, content: {application/json: {schema: {$ref: '#/components/schemas/InquiryTripDetail'}}}}
+    patch:
+      tags: [Trips]
+      operationId: updateTrip
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: {type: string, enum: [active, completed, cancelled]}
+                note: {type: string}
+      responses:
+        '200': {description: Updated}
+  /inquiry-trips/{tripId}/visits:
+    post:
+      tags: [Visits]
+      summary: Start a supplier visit under a trip
+      operationId: createVisit
+      parameters:
+        - {$ref: '#/components/parameters/TripId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [supplierKey]
+              properties:
+                supplierKey: {type: string}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/SupplierVisit'}}}}
+  /visits/{visitId}:
+    get:
+      tags: [Visits]
+      operationId: getVisit
+      parameters: [{$ref: '#/components/parameters/VisitId'}]
+      responses:
+        '200': {description: OK, content: {application/json: {schema: {$ref: '#/components/schemas/SupplierVisitDetail'}}}}
+  /visits/{visitId}/submit:
+    post:
+      tags: [Visits]
+      summary: Submit all current draft inquiry items in a supplier visit and create immutable revision snapshot
+      operationId: submitVisit
+      parameters:
+        - {$ref: '#/components/parameters/VisitId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientMutationId: {type: string, format: uuid}
+                acknowledgeWarnings: {type: array, items: {type: string}}
+      responses:
+        '200': {description: Submitted, content: {application/json: {schema: {$ref: '#/components/schemas/VisitSubmission'}}}}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /visits/{visitId}/items:
+    get:
+      tags: [InquiryItems]
+      operationId: listVisitItems
+      parameters: [{$ref: '#/components/parameters/VisitId'}]
+      responses:
+        '200':
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/InquiryItem'}
+    post:
+      tags: [InquiryItems]
+      operationId: createInquiryItem
+      parameters:
+        - {$ref: '#/components/parameters/VisitId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InquiryItemUpsert'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/InquiryItem'}}}}
+  /inquiry-items/{itemId}:
+    parameters:
+      - {$ref: '#/components/parameters/ItemId'}
+    patch:
+      tags: [InquiryItems]
+      operationId: updateInquiryItem
+      parameters: [{$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InquiryItemUpsert'}
+      responses:
+        '200': {description: Updated, content: {application/json: {schema: {$ref: '#/components/schemas/InquiryItem'}}}}
+        '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [InquiryItems]
+      operationId: deleteInquiryItem
+      responses:
+        '204': {description: Deleted draft or soft-deleted revision source}
+  /visits/{visitId}/items/bulk:
+    post:
+      tags: [InquiryItems]
+      summary: Create/update multiple draft items from batch review
+      operationId: bulkUpsertInquiryItems
+      parameters:
+        - {$ref: '#/components/parameters/VisitId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  maxItems: 100
+                  items: {$ref: '#/components/schemas/InquiryItemUpsert'}
+      responses:
+        '200': {description: Bulk result}
+  /files/upload-ticket:
+    post:
+      tags: [Files]
+      summary: Create short-lived OSS upload credential or signed URL
+      operationId: createUploadTicket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [purpose, fileName, contentType, sha256]
+              properties:
+                purpose: {type: string, enum: [product, customer_photo, business_card, export_attachment, diagnostic_log]}
+                fileName: {type: string}
+                contentType: {type: string}
+                sha256: {type: string}
+                sizeBytes: {type: integer, format: int64}
+      responses:
+        '200': {description: Upload ticket, content: {application/json: {schema: {$ref: '#/components/schemas/UploadTicket'}}}}
+  /files/{assetId}/complete:
+    post:
+      tags: [Files]
+      operationId: completeUpload
+      parameters:
+        - in: path
+          name: assetId
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200': {description: Asset validated and ready}
+  /ai/business-card/parse:
+    post:
+      tags: [AI]
+      summary: Parse supplier business card image
+      operationId: parseBusinessCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assetId]
+              properties:
+                assetId: {type: string, format: uuid}
+      responses:
+        '202': {description: AI job accepted, content: {application/json: {schema: {$ref: '#/components/schemas/AIJob'}}}}
+  /ai/handwriting/parse:
+    post:
+      tags: [AI]
+      summary: OCR and structure product photo handwritten quotation data
+      operationId: parseHandwriting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assetId]
+              properties:
+                assetId: {type: string, format: uuid}
+                hints:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '202': {description: AI job accepted, content: {application/json: {schema: {$ref: '#/components/schemas/AIJob'}}}}
+  /ai/batch/parse:
+    post:
+      tags: [AI]
+      summary: Create AI jobs for a batch of product photos
+      operationId: parseBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assetIds]
+              properties:
+                assetIds: {type: array, maxItems: 100, items: {type: string, format: uuid}}
+                visitId: {type: string, format: uuid}
+      responses:
+        '202': {description: Batch accepted}
+  /ai/jobs/{jobId}:
+    get:
+      tags: [AI]
+      operationId: getAiJob
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200': {description: Job status, content: {application/json: {schema: {$ref: '#/components/schemas/AIJob'}}}}
+  /translation:
+    post:
+      tags: [Translation]
+      summary: Translate field text or conversation text
+      operationId: translate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, targetLanguage]
+              properties:
+                text: {type: string}
+                sourceLanguage: {type: string, nullable: true}
+                targetLanguage: {type: string}
+                context: {type: string, enum: [quotation, conversation, product, general]}
+      responses:
+        '200':
+          description: Translation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  translatedText: {type: string}
+                  detectedLanguage: {type: string}
+  /exports/excel:
+    post:
+      tags: [Export]
+      summary: Generate Excel for a trip or selected records
+      operationId: createExcelExport
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tripId]
+              properties:
+                tripId: {type: string, format: uuid}
+                templateId: {type: string, format: uuid, nullable: true}
+                language: {type: string, default: en}
+                currency: {type: string, nullable: true}
+      responses:
+        '202': {description: Export job accepted, content: {application/json: {schema: {$ref: '#/components/schemas/ExportJob'}}}}
+  /exports/{exportId}:
+    get:
+      tags: [Export]
+      operationId: getExportJob
+      parameters:
+        - in: path
+          name: exportId
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200': {description: Export status, content: {application/json: {schema: {$ref: '#/components/schemas/ExportJob'}}}}
+  /sync/changes:
+    get:
+      tags: [Sync]
+      summary: Pull server-side changes after a cursor for offline cache refresh
+      operationId: pullChanges
+      parameters:
+        - in: query
+          name: cursor
+          schema: {type: string, nullable: true}
+        - in: query
+          name: limit
+          schema: {type: integer, default: 200, maximum: 500}
+      responses:
+        '200':
+          description: Change feed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ChangeFeed'}
+  /sync/mutations:
+    post:
+      tags: [Sync]
+      summary: Push queued client mutations idempotently
+      operationId: pushMutations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MutationBatch'}
+      responses:
+        '200': {description: Mutation results}
+  /agent/chat:
+    post:
+      tags: [Agent]
+      summary: Ask GPT brain assistant using authorized tools only
+      operationId: agentChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                conversationId: {type: string, format: uuid, nullable: true}
+                message: {type: string}
+                currentContext:
+                  type: object
+                  properties:
+                    tripId: {type: string, format: uuid, nullable: true}
+                    visitId: {type: string, format: uuid, nullable: true}
+      responses:
+        '200':
+          description: Assistant response or confirmation challenge
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AgentResponse'}
+  /agent/actions/{actionId}/confirm:
+    post:
+      tags: [Agent]
+      summary: Confirm one pending high-risk agent action
+      operationId: confirmAgentAction
+      parameters:
+        - in: path
+          name: actionId
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200': {description: Action executed and audited}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Search:
+      in: query
+      name: q
+      schema: {type: string}
+    Cursor:
+      in: query
+      name: cursor
+      schema: {type: string, nullable: true}
+    PageSize:
+      in: query
+      name: pageSize
+      schema: {type: integer, default: 30, minimum: 1, maximum: 100}
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: {type: string, minLength: 8, maxLength: 100}
+    IfMatch:
+      in: header
+      name: If-Match
+      required: false
+      schema: {type: string}
+    CustomerKey:
+      in: path
+      name: customerKey
+      required: true
+      description: Existing NEWERP customer business key; concrete DB type mapped by repository layer
+      schema: {type: string}
+    SupplierKey:
+      in: path
+      name: supplierKey
+      required: true
+      description: Existing NEWERP supplier business key; concrete DB type mapped by repository layer
+      schema: {type: string}
+    TripId:
+      in: path
+      name: tripId
+      required: true
+      schema: {type: string, format: uuid}
+    VisitId:
+      in: path
+      name: visitId
+      required: true
+      schema: {type: string, format: uuid}
+    ItemId:
+      in: path
+      name: itemId
+      required: true
+      schema: {type: string, format: uuid}
+  responses:
+    AuthSuccess:
+      description: Authenticated
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/AuthResponse'}
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    NotFound:
+      description: Not found or not visible in data scope
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    Conflict:
+      description: Optimistic concurrency or duplicate conflict
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    ValidationError:
+      description: Business validation failed
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status, correlationId]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string, nullable: true}
+        correlationId: {type: string}
+        errors: {type: object, additionalProperties: true}
+    PasswordLoginRequest:
+      type: object
+      required: [account, password]
+      properties:
+        account: {type: string}
+        password: {type: string, format: password}
+        deviceId: {type: string, nullable: true}
+    RegisterRequest:
+      type: object
+      required: [phone, verificationCode]
+      properties:
+        phone: {type: string}
+        verificationCode: {type: string}
+        inviteCode: {type: string, nullable: true}
+        password: {type: string, format: password, nullable: true}
+        displayName: {type: string, nullable: true}
+    AuthResponse:
+      type: object
+      required: [accessToken, expiresIn, user]
+      properties:
+        accessToken: {type: string}
+        refreshToken: {type: string, nullable: true}
+        expiresIn: {type: integer}
+        user: {$ref: '#/components/schemas/UserSummary'}
+    UserSummary:
+      type: object
+      required: [userKey, displayName, tenantId]
+      properties:
+        userKey: {type: string}
+        displayName: {type: string}
+        tenantId: {type: string, format: uuid}
+        groupKeys: {type: array, items: {type: string}}
+        roles: {type: array, items: {type: string}}
+    BootstrapResponse:
+      type: object
+      required: [user, theme, features, permissions, dictionaries]
+      properties:
+        user: {$ref: '#/components/schemas/UserSummary'}
+        theme: {type: object, additionalProperties: true}
+        features: {type: object, additionalProperties: {type: boolean}}
+        permissions: {type: array, items: {type: string}}
+        dictionaries: {type: object, additionalProperties: true}
+        syncCursor: {type: string, nullable: true}
+    Customer:
+      type: object
+      required: [customerKey, name, rowVersion]
+      properties:
+        customerKey: {type: string}
+        name: {type: string}
+        customerNo: {type: string, nullable: true}
+        mark: {type: string, nullable: true}
+        photoAssetId: {type: string, format: uuid, nullable: true}
+        note: {type: string, nullable: true}
+        preferences: {type: string, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+        rowVersion: {type: string}
+    CustomerUpsert:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string}
+        customerNo: {type: string, nullable: true}
+        mark: {type: string, nullable: true}
+        photoAssetId: {type: string, format: uuid, nullable: true}
+        note: {type: string, nullable: true}
+        preferences: {type: string, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+    CustomerPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Customer'}}
+        nextCursor: {type: string, nullable: true}
+    Supplier:
+      type: object
+      required: [supplierKey, name, rowVersion]
+      properties:
+        supplierKey: {type: string}
+        name: {type: string}
+        shopNo: {type: string, nullable: true}
+        contact: {type: string, nullable: true}
+        phone: {type: string, nullable: true}
+        address: {type: string, nullable: true}
+        businessCardAssetId: {type: string, format: uuid, nullable: true}
+        reputationNote: {type: string, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+        rowVersion: {type: string}
+    SupplierUpsert:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string}
+        shopNo: {type: string, nullable: true}
+        contact: {type: string, nullable: true}
+        phone: {type: string, nullable: true}
+        address: {type: string, nullable: true}
+        businessCardAssetId: {type: string, format: uuid, nullable: true}
+        reputationNote: {type: string, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+    SupplierPage:
+      type: object
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Supplier'}}
+        nextCursor: {type: string, nullable: true}
+    InquiryTrip:
+      type: object
+      required: [tripId, customerKey, status, startedAt]
+      properties:
+        tripId: {type: string, format: uuid}
+        customerKey: {type: string}
+        status: {type: string, enum: [active, completed, cancelled]}
+        startedAt: {type: string, format: date-time}
+        endedAt: {type: string, format: date-time, nullable: true}
+        visitCount: {type: integer}
+        itemCount: {type: integer}
+    InquiryTripDetail:
+      allOf:
+        - {$ref: '#/components/schemas/InquiryTrip'}
+        - type: object
+          properties:
+            visits: {type: array, items: {$ref: '#/components/schemas/SupplierVisit'} }
+    SupplierVisit:
+      type: object
+      required: [visitId, tripId, supplierKey, status]
+      properties:
+        visitId: {type: string, format: uuid}
+        tripId: {type: string, format: uuid}
+        supplierKey: {type: string}
+        status: {type: string, enum: [draft, submitted, cancelled]}
+        itemCount: {type: integer}
+        revisionNo: {type: integer}
+    SupplierVisitDetail:
+      allOf:
+        - {$ref: '#/components/schemas/SupplierVisit'}
+        - type: object
+          properties:
+            items: {type: array, items: {$ref: '#/components/schemas/InquiryItem'}}
+    InquiryItem:
+      type: object
+      required: [itemId, visitId, status, rowVersion]
+      properties:
+        itemId: {type: string, format: uuid}
+        clientItemId: {type: string, format: uuid, nullable: true}
+        visitId: {type: string, format: uuid}
+        status: {type: string, enum: [draft, submitted, superseded, deleted]}
+        productName: {type: string, nullable: true}
+        description: {type: string, nullable: true}
+        imageAssetIds: {type: array, maxItems: 3, items: {type: string, format: uuid}}
+        unitPrice: {type: number, multipleOf: 0.001, nullable: true}
+        currency: {type: string, default: CNY}
+        unit: {type: string, nullable: true}
+        qtyPerCarton: {type: integer, nullable: true}
+        cartonLengthCm: {type: number, nullable: true}
+        cartonWidthCm: {type: number, nullable: true}
+        cartonHeightCm: {type: number, nullable: true}
+        cartonCbm: {type: number, nullable: true}
+        moq: {type: integer, nullable: true}
+        remark: {type: string, nullable: true}
+        aiTrace: {type: object, additionalProperties: true, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+        rowVersion: {type: string}
+    InquiryItemUpsert:
+      type: object
+      properties:
+        clientItemId: {type: string, format: uuid}
+        productName: {type: string, nullable: true}
+        description: {type: string, nullable: true}
+        imageAssetIds: {type: array, maxItems: 3, items: {type: string, format: uuid}}
+        unitPrice: {type: number, multipleOf: 0.001, nullable: true}
+        currency: {type: string, default: CNY}
+        unit: {type: string, nullable: true}
+        qtyPerCarton: {type: integer, nullable: true}
+        cartonLengthCm: {type: number, nullable: true}
+        cartonWidthCm: {type: number, nullable: true}
+        cartonHeightCm: {type: number, nullable: true}
+        cartonCbm: {type: number, nullable: true}
+        moq: {type: integer, nullable: true}
+        remark: {type: string, nullable: true}
+        aiTrace: {type: object, additionalProperties: true, nullable: true}
+        dynamicFields: {type: object, additionalProperties: true}
+    VisitSubmission:
+      type: object
+      properties:
+        visitId: {type: string, format: uuid}
+        revisionNo: {type: integer}
+        submittedAt: {type: string, format: date-time}
+        submittedItemCount: {type: integer}
+    UploadTicket:
+      type: object
+      required: [assetId, uploadUrl, expiresAt]
+      properties:
+        assetId: {type: string, format: uuid}
+        uploadUrl: {type: string, format: uri}
+        method: {type: string, enum: [PUT, POST]}
+        headers: {type: object, additionalProperties: {type: string}}
+        objectKey: {type: string}
+        expiresAt: {type: string, format: date-time}
+    AIJob:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId: {type: string, format: uuid}
+        status: {type: string, enum: [queued, running, succeeded, failed, cancelled]}
+        type: {type: string}
+        result: {type: object, additionalProperties: true, nullable: true}
+        error: {type: string, nullable: true}
+        modelVersion: {type: string, nullable: true}
+    ExportJob:
+      type: object
+      required: [exportId, status]
+      properties:
+        exportId: {type: string, format: uuid}
+        status: {type: string, enum: [queued, running, succeeded, failed]}
+        downloadUrl: {type: string, format: uri, nullable: true}
+        expiresAt: {type: string, format: date-time, nullable: true}
+    ChangeFeed:
+      type: object
+      properties:
+        nextCursor: {type: string}
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              entityType: {type: string}
+              entityKey: {type: string}
+              operation: {type: string, enum: [upsert, delete]}
+              version: {type: string}
+              changedAt: {type: string, format: date-time}
+    MutationBatch:
+      type: object
+      required: [deviceId, mutations]
+      properties:
+        deviceId: {type: string}
+        mutations:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required: [mutationId, entityType, operation, payload]
+            properties:
+              mutationId: {type: string, format: uuid}
+              entityType: {type: string}
+              entityKey: {type: string, nullable: true}
+              operation: {type: string, enum: [create, update, delete, submit]}
+              baseVersion: {type: string, nullable: true}
+              payload: {type: object, additionalProperties: true}
+    AgentResponse:
+      type: object
+      properties:
+        conversationId: {type: string, format: uuid}
+        message: {type: string}
+        pendingAction:
+          nullable: true
+          oneOf:
+            - type: object
+              required: [actionId, title, risk]
+              properties:
+                actionId: {type: string, format: uuid}
+                title: {type: string}
+                risk: {type: string, enum: [medium, high]}
+                summary: {type: string}

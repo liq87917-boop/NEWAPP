@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "project": {
+    "name": "NEWAPP",
+    "root": "D:\\VSCodeProject\\NEWAPP",
+    "role": "mobile_workspace",
+    "shares_database_and_oss_with": "NEWERP"
+  },
+  "sources": {
+    "tasks": "docs/NEWAPP_TASKS_V1.yaml",
+    "brain_rules": ".ai/BRAIN_RULES.md",
+    "executor_rules": ".ai/EXECUTOR_RULES.md",
+    "state": ".ai/project_state.json"
+  },
+  "runtime": {
+    "default_command": "preflight",
+    "max_attempts_per_task": 3,
+    "cline_timeout_seconds": 3600,
+    "openai_model_env": "OPENAI_MODEL",
+    "openai_default_model": "gpt-6-astra",
+    "cline_command": "cline",
+    "require_git": true,
+    "require_baseline_commit": true,
+    "auto_commit_after_acceptance": true,
+    "auto_push": false
+  },
+  "queue": {
+    "runnable_states": ["queued", "retry"],
+    "terminal_states": ["completed", "deferred", "skipped"],
+    "blocking_states": ["awaiting_brain", "awaiting_human", "executing", "code_ready", "validating", "awaiting_review", "blocked", "failed"],
+    "fail_closed": true
+  },
+  "paths": {
+    "protected": [".env", ".env.*", "agent.env", "agent.env.*", ".ai/controller/**", ".ai/agent_config.yaml", ".ai/project_state.json", ".ai/decisions/**", ".ai/locks/**", ".clinerules", "start_agent.bat", "**/*.pfx", "**/*.p12", "**/*.jks", "**/*.keystore", "**/*.pem", "**/*.key"],
+    "executor_allowed": ["src/**", "tests/**", "docs/**", "database/**", ".github/**", ".ai/generated/**", "*.sln", "*.md", ".gitignore"]
+  },
+  "human_gate": {
+    "task_ids": ["NEWAPP-009", "NEWAPP-060", "NEWAPP-066", "NEWAPP-067", "NEWAPP-068"],
+    "trigger_terms": ["production", "deploy", "release", "signing", "shared database write", "apply migration", "execute ddl", "alter table", "create table", "drop table", "truncate table"],
+    "always_for_shared_database_structure": true,
+    "forbidden_even_with_approval": ["drop", "truncate", "destructive migration", "production dml", "production deployment"]
+  },
+  "environment": {
+    "file": ".env",
+    "required_key_groups": {
+      "database": ["ERP_ConnectionStrings__Default"],
+      "oss": ["ERP_Oss__Endpoint", "ERP_Oss__Bucket", "ERP_Oss__AccessKeyId", "ERP_Oss__AccessKeySecret"],
+      "auth": ["ERP_Jwt__Key"],
+      "brain": ["OPENAI_API_KEY"]
+    },
+    "never_log_patterns": ["PASSWORD", "SECRET", "TOKEN", "KEY", "CONNECTIONSTRING", "ACCESSKEY"]
+  },
+  "validation": {
+    "profiles": {
+      "control_plane": [["{python}", "-m", "compileall", "-q", ".ai/controller"], ["{python}", "-m", "unittest", "discover", "-s", ".ai/controller/tests", "-p", "test_*.py"]],
+      "safe": [["{python}", "-m", "compileall", "-q", ".ai/controller"]]
+    },
+    "dangerous_command_tokens": ["drop", "truncate", "sqlcmd", "invoke-sqlcmd", "migrate", "deploy", "publish", "sign"],
+    "require_screenshot_when_terms": ["ui", "screen", "visual", "flutter", "arkui", "browser"]
+  },
+  "browser_acceptance": {
+    "require_real_browser": true,
+    "minimum_screenshots": 1,
+    "commands": []
+  },
+  "evidence": {
+    "logs_dir": ".ai/logs",
+    "evidence_dir": ".ai/evidence",
+    "screenshots_dir": ".ai/screenshots",
+    "decisions_dir": ".ai/decisions",
+    "locks_dir": ".ai/locks",
+    "hash_algorithm": "sha256"
+  }
+}

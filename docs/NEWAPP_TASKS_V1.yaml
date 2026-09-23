@@ -1,0 +1,529 @@
+project:
+  name: NEWAPP
+  root: 'D:\VSCodeProject\NEWAPP'
+  brain: GPT
+  executor_policy: >-
+    GPT is the sole planning/review brain. Cline/other coding models execute one approved task at a time,
+    may propose implementation details, but must not silently change product rules, architecture, priorities,
+    database contracts, security boundaries, or acceptance criteria.
+  relationship_to_newerp: >-
+    NEWERP is the PC ERP and NEWAPP is the mobile workspace of the same business platform.
+    They share the same SQL Server database, the same OSS and the same master/business data.
+    NEWAPP must not implement customer/supplier master-data synchronization copies.
+  environment:
+    env_file: 'D:\VSCodeProject\NEWAPP\.env'
+    rules:
+      - 'Read existing keys; never overwrite .env automatically.'
+      - 'Never echo database passwords, OSS AccessKeySecret, tokens or full connection strings into logs/evidence.'
+      - 'Server/worker may use DB and OSS secrets; mobile clients may not.'
+      - 'If env key names differ from code defaults, add a ConfigMapping layer rather than renaming user secrets without approval.'
+  target_clients:
+    android_ios: Flutter
+    harmonyos_next: ArkTS_ArkUI
+  backend: ASP.NET_Core
+  ai_service: Python
+  database: SQL_Server_shared_with_NEWERP
+  object_storage: OSS_shared_with_NEWERP
+  api_contract: NEWAPP_OpenAPI_V1.yaml
+  database_contract: NEWAPP_Database_DDL_V1.sql
+  ui_contract: NEWAPP_UI页面原型与交互说明_V1.0.docx
+
+automation:
+  task_states: [queued, running, validating, review, completed, blocked, human_attention, deferred]
+  required_artifacts_per_task:
+    - implementation_diff
+    - test_result
+    - evidence_json
+  ui_task_artifacts:
+    - screenshot_or_screen_recording
+    - layout_assertions
+  gates:
+    - name: secret_guard
+      requirement: 'No .env secret value appears in git diff, logs, screenshots or evidence.'
+    - name: architecture_guard
+      requirement: 'No mobile client direct SQL connection and no long-lived OSS secret in mobile package.'
+    - name: shared_data_guard
+      requirement: 'Do not create duplicate Customer/Supplier master tables when NEWERP already owns them.'
+    - name: migration_guard
+      requirement: 'Any DB migration is idempotent/reviewable and does not destructively modify existing NEWERP tables without explicit approval.'
+    - name: regression_guard
+      requirement: 'Relevant backend, DB, client, sync and permission tests pass before task completion.'
+    - name: gpt_review
+      requirement: 'GPT compares evidence to task acceptance criteria before advancing the queue.'
+
+phases:
+  - id: P0
+    name: Repository and discovery
+  - id: P1
+    name: Shared platform foundation
+  - id: P2
+    name: Authentication and bootstrap
+  - id: P3
+    name: Customer and supplier workspace
+  - id: P4
+    name: Inquiry core workflow
+  - id: P5
+    name: Camera, OSS and AI recognition
+  - id: P6
+    name: Batch capture and review
+  - id: P7
+    name: Excel export and records
+  - id: P8
+    name: Offline sync and conflict handling
+  - id: P9
+    name: Customization and admin control plane
+  - id: P10
+    name: GPT agent workspace
+  - id: P11
+    name: NEWERP seamless cross-terminal use
+  - id: P12
+    name: Release hardening
+
+tasks:
+  - id: NEWAPP-001
+    phase: P0
+    title: Freeze repository baseline and secret rules
+    depends_on: []
+    actions:
+      - 'Initialize/inspect git repository without modifying .env.'
+      - 'Add .env, local secrets, generated signing files and temporary exports to .gitignore.'
+      - 'Add repository rules stating GPT brain/executor separation.'
+    acceptance:
+      - '.env remains present locally and untracked.'
+      - 'Secret scanner on tracked files reports no credentials.'
+  - id: NEWAPP-002
+    phase: P0
+    title: Inspect existing .env configuration contract safely
+    depends_on: [NEWAPP-001]
+    actions:
+      - 'Read only key NAMES from .env; never print values.'
+      - 'Classify keys as DB, OSS, auth provider, AI provider, app settings.'
+      - 'Generate config binding map and missing-key report.'
+    acceptance:
+      - 'Evidence contains key names only, with all values redacted.'
+      - 'No existing .env key is renamed or overwritten.'
+  - id: NEWAPP-003
+    phase: P0
+    title: Inspect NEWERP shared database schema
+    depends_on: [NEWAPP-002]
+    actions:
+      - 'Connect using server-side .env configuration.'
+      - 'Read metadata only: schemas, tables, keys, indexes, rowversion columns and relevant customer/supplier/user/organization/dictionary/inquiry tables.'
+      - 'Produce docs/NEWERP_SCHEMA_MAP.md with actual table/key mappings; redact data values.'
+    acceptance:
+      - 'Actual customer, supplier, user and tenant/company master tables are identified.'
+      - 'No DDL/DML executed against production/shared DB.'
+  - id: NEWAPP-004
+    phase: P0
+    title: Inspect shared OSS contract
+    depends_on: [NEWAPP-002]
+    actions:
+      - 'Identify provider/endpoint/bucket/key-prefix configuration from env without logging secrets.'
+      - 'Document NEWERP object-key conventions if discoverable from code/DB metadata.'
+    acceptance:
+      - 'Shared bucket/key-prefix strategy is documented.'
+      - 'No secret is printed.'
+  - id: NEWAPP-005
+    phase: P0
+    title: Reconcile DDL with actual NEWERP keys
+    depends_on: [NEWAPP-003]
+    actions:
+      - 'Map neutral CustomerKey/SupplierKey/UserKey/TenantId to actual NEWERP key types.'
+      - 'Prefer direct FK/view/repository mapping where safe; do not duplicate master tables.'
+      - 'Create migration plan and rollback notes.'
+    acceptance:
+      - 'DDL compiles in a disposable copy/test DB.'
+      - 'No destructive change to existing NEWERP tables.'
+  - id: NEWAPP-006
+    phase: P0
+    title: Establish automated status console
+    depends_on: [NEWAPP-001]
+    actions:
+      - 'Create start_agent.bat or equivalent status console showing git, current task, last validation and blockers.'
+      - 'Keep GPT as decision/review authority.'
+    acceptance:
+      - 'Console starts from repository root and updates task status from machine-readable state.'
+
+  - id: NEWAPP-007
+    phase: P1
+    title: Create backend solution skeleton
+    depends_on: [NEWAPP-005]
+    actions: ['Create ASP.NET Core API, Domain, Infrastructure, Worker, Tests projects.', 'Bind configuration from .env through typed options without logging secrets.']
+    acceptance: ['Solution builds.', 'Health endpoint works locally.', 'Config validation fails with key NAMES only when required config is absent.']
+  - id: NEWAPP-008
+    phase: P1
+    title: Create shared database repositories
+    depends_on: [NEWAPP-007]
+    actions: ['Implement repository interfaces for actual NEWERP master tables and app schema tables.', 'Inject tenant/user data scope server-side.']
+    acceptance: ['Customer/supplier queries read existing shared master data.', 'No duplicate master repository writes to app-only copies.']
+  - id: NEWAPP-009
+    phase: P1
+    title: Apply app schema migration in test database
+    depends_on: [NEWAPP-005, NEWAPP-007]
+    actions: ['Execute reconciled app schema DDL against disposable/test DB.', 'Verify re-run/idempotency.']
+    acceptance: ['Migration succeeds twice without data loss.', 'Existing NEWERP objects remain unchanged except explicitly approved non-destructive indexes/FKs.']
+  - id: NEWAPP-010
+    phase: P1
+    title: Implement shared OSS abstraction
+    depends_on: [NEWAPP-004, NEWAPP-007]
+    actions: ['Implement server-side OSS client from env.', 'Implement short-lived signed upload/download tickets.', 'Use shared object-key naming contract.']
+    acceptance: ['Mobile can upload using signed ticket without receiving AccessKeySecret.', 'Uploaded object metadata appears in app.FileAsset.']
+  - id: NEWAPP-011
+    phase: P1
+    title: Define OpenAPI generation and compatibility gate
+    depends_on: [NEWAPP-007]
+    actions: ['Serve generated OpenAPI.', 'Diff generated API against NEWAPP_OpenAPI_V1.yaml in CI.', 'Block breaking changes without version bump/ADR.']
+    acceptance: ['CI detects removed endpoint or incompatible schema change.']
+  - id: NEWAPP-012
+    phase: P1
+    title: Create Flutter app shell
+    depends_on: [NEWAPP-011]
+    actions: ['Create Android/iOS Flutter app.', 'Add routing, theme tokens, API client, local DB, secure token storage and diagnostics shell.']
+    acceptance: ['Android and iOS debug builds succeed.', 'No DB/OSS secret exists in bundle/config.']
+  - id: NEWAPP-013
+    phase: P1
+    title: Create HarmonyOS NEXT app shell
+    depends_on: [NEWAPP-011]
+    actions: ['Create ArkTS/ArkUI shell using same API and Design Tokens.', 'Generate/share API models from OpenAPI where practical.']
+    acceptance: ['HarmonyOS app builds in DevEco environment.', 'Navigation parity with Flutter shell.']
+  - id: NEWAPP-014
+    phase: P1
+    title: Add observability and correlation IDs
+    depends_on: [NEWAPP-007]
+    actions: ['Structured logs with correlation ID.', 'PII/secret redaction.', 'Request/AI/upload/export tracing.']
+    acceptance: ['A failed request can be traced end-to-end without logging secrets.']
+
+  - id: NEWAPP-015
+    phase: P2
+    title: Implement account-password login
+    depends_on: [NEWAPP-008]
+    actions: ['Integrate with shared NEWERP user identity or approved binding table.', 'Issue NEWAPP access tokens with tenant/group/role claims.']
+    acceptance: ['Valid user logs in.', 'Disabled user cannot log in.', 'Token scope reflects current organization.']
+  - id: NEWAPP-016
+    phase: P2
+    title: Implement SMS login and registration
+    depends_on: [NEWAPP-015]
+    actions: ['SMS send/verify flow.', 'Rate limiting.', 'Optional/required invite code rules.']
+    acceptance: ['Replay/expired codes fail.', 'Invite usage is atomic.']
+  - id: NEWAPP-017
+    phase: P2
+    title: Implement WeChat login
+    depends_on: [NEWAPP-015]
+    actions: ['OAuth exchange on server.', 'Bind provider subject to shared user.']
+    acceptance: ['Provider token stays server-side.', 'Existing user binding is idempotent.']
+  - id: NEWAPP-018
+    phase: P2
+    title: Implement Apple ID login
+    depends_on: [NEWAPP-015]
+    actions: ['Validate Apple identity token server-side.', 'Bind provider subject.']
+    acceptance: ['Invalid issuer/audience/nonce rejected.', 'User binding idempotent.']
+  - id: NEWAPP-019
+    phase: P2
+    title: Implement carrier one-tap phone login adapter
+    depends_on: [NEWAPP-015]
+    actions: ['Provider-agnostic adapter.', 'Server exchanges carrier token; mobile never trusts raw phone claim without server verification.']
+    acceptance: ['Provider can be swapped by configuration.', 'Fallback to SMS available.']
+  - id: NEWAPP-020
+    phase: P2
+    title: Bootstrap endpoint and client startup
+    depends_on: [NEWAPP-015, NEWAPP-012]
+    actions: ['Return theme, feature flags, permissions, dictionaries, version policy and sync cursor.', 'Cache safe bootstrap subset locally.']
+    acceptance: ['App startup renders tenant theme and permission-aware navigation.']
+
+  - id: NEWAPP-021
+    phase: P3
+    title: Customer list with group data scope
+    depends_on: [NEWAPP-008, NEWAPP-020]
+    actions: ['Use existing NEWERP customer master data.', 'Apply current user group scope on server.', 'Merge app.CustomerExt fields.']
+    acceptance: ['User cannot query another group by modifying API parameters.', 'Search supports key customer fields.']
+  - id: NEWAPP-022
+    phase: P3
+    title: Customer create edit soft-delete
+    depends_on: [NEWAPP-021]
+    actions: ['Write approved fields to shared NEWERP customer master.', 'Write photo/mark/preferences to mapped fields or CustomerExt.', 'Use optimistic concurrency.']
+    acceptance: ['NEWERP PC sees new/updated customer without sync job.', 'Audit captures editor and time.']
+  - id: NEWAPP-023
+    phase: P3
+    title: Supplier list shared inside tenant
+    depends_on: [NEWAPP-008, NEWAPP-020]
+    actions: ['Read existing NEWERP supplier master.', 'No salesperson data restriction inside same tenant.', 'Merge SupplierExt.']
+    acceptance: ['Two users in same tenant see same supplier.', 'Different tenants remain isolated.']
+  - id: NEWAPP-024
+    phase: P3
+    title: Supplier create edit soft-delete
+    depends_on: [NEWAPP-023]
+    actions: ['Create/update shared NEWERP supplier master.', 'Implement shop-no/phone/name duplicate candidate check.']
+    acceptance: ['NEWERP PC sees change immediately.', 'Duplicate warning does not silently merge records.']
+  - id: NEWAPP-025
+    phase: P3
+    title: Customer and supplier mobile UI
+    depends_on: [NEWAPP-021, NEWAPP-023]
+    actions: ['Implement S05/S06/S08/S10/S23/S24.', 'Support large touch targets and keyboard-safe forms.']
+    acceptance: ['UI screenshots match spec.', 'Permissions reflected but not relied upon client-side for security.']
+
+  - id: NEWAPP-026
+    phase: P4
+    title: InquiryTrip domain and API
+    depends_on: [NEWAPP-009, NEWAPP-021]
+    actions: ['Create/list/complete trips.', 'Persist salesperson/group snapshot.']
+    acceptance: ['A user can resume active trip for same customer.', 'Completed trip remains queryable.']
+  - id: NEWAPP-027
+    phase: P4
+    title: SupplierVisit domain and API
+    depends_on: [NEWAPP-026, NEWAPP-023]
+    actions: ['Start visit, sequence stores, draft/submitted state.']
+    acceptance: ['One trip supports multiple ordered store visits.']
+  - id: NEWAPP-028
+    phase: P4
+    title: InquiryItem draft CRUD
+    depends_on: [NEWAPP-027]
+    actions: ['Create/update/delete drafts.', 'Price precision 3 decimals.', '1-3 image references.', 'Carton CBM calculation/validation.']
+    acceptance: ['100 draft items remain performant.', 'Concurrency conflict returns 409 instead of overwriting.']
+  - id: NEWAPP-029
+    phase: P4
+    title: Submit store and immutable revision
+    depends_on: [NEWAPP-028]
+    actions: ['Validate required fields.', 'Create InquiryRevision and snapshots in one transaction.', 'Advance CurrentRevisionNo.']
+    acceptance: ['Retry with same idempotency key does not create duplicate revision.', 'Historical revision never changes.']
+  - id: NEWAPP-030
+    phase: P4
+    title: Core inquiry mobile screens
+    depends_on: [NEWAPP-026, NEWAPP-027, NEWAPP-028, NEWAPP-029]
+    actions: ['Implement S04/S07/S11/S12/S17/S18/S19.']
+    acceptance: ['E2E flow: customer -> 2 stores -> 3+ items each -> submit -> end trip.']
+
+  - id: NEWAPP-031
+    phase: P5
+    title: Camera capture and local image pipeline
+    depends_on: [NEWAPP-012, NEWAPP-010]
+    actions: ['Camera/gallery, compression, orientation normalization, SHA256, local queue.', 'Do not block next capture on upload/AI.']
+    acceptance: ['Three product images supported.', 'Photo survives app restart before upload.']
+  - id: NEWAPP-032
+    phase: P5
+    title: OSS upload queue
+    depends_on: [NEWAPP-031]
+    actions: ['Request signed ticket, upload direct to OSS, complete asset, retry with backoff.']
+    acceptance: ['Interrupted upload resumes/retries.', 'Long-lived OSS credentials never appear on device.']
+  - id: NEWAPP-033
+    phase: P5
+    title: Business card OCR service
+    depends_on: [NEWAPP-010]
+    actions: ['Python OCR endpoint/job.', 'Extract shop no/contact/phone/address/name with confidence.', 'Return duplicate-search hints.']
+    acceptance: ['Golden test set reports field-level metrics.', 'Low-confidence fields explicitly marked.']
+  - id: NEWAPP-034
+    phase: P5
+    title: Business card scan UI
+    depends_on: [NEWAPP-033, NEWAPP-025]
+    actions: ['Implement S09 image capture/crop/preview/result confirmation.']
+    acceptance: ['User can correct every AI field before create.']
+  - id: NEWAPP-035
+    phase: P5
+    title: Product photo quality detector
+    depends_on: [NEWAPP-031]
+    actions: ['Detect blur, darkness, glare and tiny handwriting region.', 'Return advisory score.']
+    acceptance: ['Advisory never blocks save without user choice.']
+  - id: NEWAPP-036
+    phase: P5
+    title: Handwriting OCR baseline
+    depends_on: [NEWAPP-033]
+    actions: ['Build pipeline for handwritten marker text in product/floor photos.', 'Store raw OCR blocks/coordinates/model version.']
+    acceptance: ['Golden dataset reproducible.', 'Raw OCR preserved for future retraining.']
+  - id: NEWAPP-037
+    phase: P5
+    title: Quotation field parser
+    depends_on: [NEWAPP-036]
+    actions: ['Map OCR text to unit price, qty/carton, carton size, CBM, MOQ and units.', 'Combine deterministic rules with LLM structured output.', 'Never invent low-confidence numeric values.']
+    acceptance: ['Parser produces field confidence and source evidence.', 'Invalid numeric/unit combinations are flagged.']
+  - id: NEWAPP-038
+    phase: P5
+    title: AI confirmation UI
+    depends_on: [NEWAPP-035, NEWAPP-037]
+    actions: ['Implement S13/S14 overlay boxes, confidence, quick corrections and accept.']
+    acceptance: ['Low-confidence fields visually distinct.', 'Correction saved to AICorrection.']
+  - id: NEWAPP-039
+    phase: P5
+    title: Translation service and UI
+    depends_on: [NEWAPP-020]
+    actions: ['Text translation API abstraction.', 'Implement S25 with quotation/conversation context.']
+    acceptance: ['Source/target language shown.', 'Failures do not block inquiry entry.']
+
+  - id: NEWAPP-040
+    phase: P6
+    title: Batch capture queue
+    depends_on: [NEWAPP-031, NEWAPP-032]
+    actions: ['Implement S15 continuous capture.', 'Create local ClientItemId per photo and run upload/AI asynchronously.']
+    acceptance: ['User can take 30 photos continuously without waiting for OCR.']
+  - id: NEWAPP-041
+    phase: P6
+    title: Batch AI orchestration
+    depends_on: [NEWAPP-037, NEWAPP-040]
+    actions: ['Parallel job scheduling with concurrency limits.', 'Aggregate job status and partial failures.']
+    acceptance: ['One failed image does not fail whole batch.', 'Retry only failed items.']
+  - id: NEWAPP-042
+    phase: P6
+    title: Batch review and bulk draft generation
+    depends_on: [NEWAPP-041]
+    actions: ['Implement S16 normal/exception filters.', 'Allow batch default currency/unit.', 'Bulk upsert drafts idempotently.']
+    acceptance: ['Normal high-confidence items can be accepted in bulk.', 'Exceptions remain explicit.']
+
+  - id: NEWAPP-043
+    phase: P7
+    title: Excel template model
+    depends_on: [NEWAPP-029]
+    actions: ['Define configurable columns, language, image positions, number formats, formulas and template version.', 'Keep exporter server-side.']
+    acceptance: ['At least one default Yiwu quotation template and one customer-specific override are supported without code fork.']
+  - id: NEWAPP-044
+    phase: P7
+    title: Excel export worker
+    depends_on: [NEWAPP-043, NEWAPP-010]
+    actions: ['Generate trip Excel in background.', 'Embed product photos.', 'Upload export result to shared OSS.', 'Persist ExportJob.']
+    acceptance: ['Export of 100 items succeeds.', 'Currency/number formats and images render correctly.']
+  - id: NEWAPP-045
+    phase: P7
+    title: Excel export UI
+    depends_on: [NEWAPP-044]
+    actions: ['Implement S20 template/language/currency selection and job progress.']
+    acceptance: ['Completed file can be opened/shared via short-lived URL.']
+  - id: NEWAPP-046
+    phase: P7
+    title: Inquiry record list and revisions
+    depends_on: [NEWAPP-029]
+    actions: ['Implement salesperson-only list by default.', 'Revision detail and edit-to-new-revision workflow.', 'S21/S22.']
+    acceptance: ['Old revision remains unchanged after modification.', 'Unauthorized salesperson cannot read another user record.']
+
+  - id: NEWAPP-047
+    phase: P8
+    title: Local database model
+    depends_on: [NEWAPP-012]
+    actions: ['Persist bootstrap cache, active trip, visits, drafts, image queue and sync mutations.']
+    acceptance: ['App restart while offline preserves all unsynced work.']
+  - id: NEWAPP-048
+    phase: P8
+    title: Mutation queue and idempotent push
+    depends_on: [NEWAPP-047, NEWAPP-029]
+    actions: ['Implement ordered local mutations and /sync/mutations.', 'Use ClientMutationId/Idempotency-Key.']
+    acceptance: ['Network flapping does not duplicate customer/supplier/trip/visit/item/submission.']
+  - id: NEWAPP-049
+    phase: P8
+    title: Change-feed pull
+    depends_on: [NEWAPP-048]
+    actions: ['Implement /sync/changes using monotonic server cursor.', 'Refresh shared master data deltas.']
+    acceptance: ['A NEWERP PC edit becomes visible in NEWAPP cache after pull without custom sync copy.']
+  - id: NEWAPP-050
+    phase: P8
+    title: Conflict resolution UI
+    depends_on: [NEWAPP-048, NEWAPP-049]
+    actions: ['Implement S27 conflict comparison.', 'Protect submitted revisions from silent overwrite.']
+    acceptance: ['User can choose server/local/merge for allowed fields.', 'Resolution is audited.']
+  - id: NEWAPP-051
+    phase: P8
+    title: Offline E2E test suite
+    depends_on: [NEWAPP-050]
+    actions: ['Automate airplane-mode style scenario: start trip, add store/items/photos, restart app, reconnect, submit.']
+    acceptance: ['No data loss or duplicates.', 'All assets eventually reach shared OSS.']
+
+  - id: NEWAPP-052
+    phase: P9
+    title: Tenant theme tokens
+    depends_on: [NEWAPP-020]
+    actions: ['Implement brand theme with protected semantic colors.', 'Flutter and ArkUI consume same token schema.']
+    acceptance: ['Theme changes without rebuilding clients.', 'Accessibility contrast passes target.']
+  - id: NEWAPP-053
+    phase: P9
+    title: Dynamic fields
+    depends_on: [NEWAPP-052]
+    actions: ['Support configured visible/required/order/default/dictionary fields for customer/supplier/inquiry.', 'Store extension values in approved mapped columns or DynamicFieldsJson.']
+    acceptance: ['New optional field can be enabled for one tenant without project copy.']
+  - id: NEWAPP-054
+    phase: P9
+    title: Web admin control plane
+    depends_on: [NEWAPP-052, NEWAPP-053, NEWAPP-043]
+    actions: ['Manage users/groups/roles, theme, feature flags, dynamic fields, Excel templates, AI thresholds and version policy.']
+    acceptance: ['Mobile does not expose enterprise-admin configuration screens.']
+
+  - id: NEWAPP-055
+    phase: P10
+    title: GPT agent tool registry
+    depends_on: [NEWAPP-014, NEWAPP-029]
+    actions: ['Define typed tools for safe reads and draft-generation.', 'No arbitrary SQL/shell tool in production agent.']
+    acceptance: ['Every tool checks same authorization/data-scope services as normal API.']
+  - id: NEWAPP-056
+    phase: P10
+    title: Agent high-risk confirmation flow
+    depends_on: [NEWAPP-055]
+    actions: ['PendingAction token for submit/delete/bulk overwrite/export-share/business workflow actions.', 'Audit confirmation and result.']
+    acceptance: ['GPT cannot execute high-risk action without valid explicit confirmation.']
+  - id: NEWAPP-057
+    phase: P10
+    title: Agent mobile UI
+    depends_on: [NEWAPP-056]
+    actions: ['Implement S26 conversation, context chips, tool result cards and confirmation sheet.']
+    acceptance: ['User can ask about current trip and navigate to referenced record.', 'Confirmation clearly shows exact action scope.']
+  - id: NEWAPP-058
+    phase: P10
+    title: Error diagnosis assistant
+    depends_on: [NEWAPP-014, NEWAPP-057]
+    actions: ['Allow agent to inspect sanitized client/server error context by CorrelationId.', 'Generate explanation and safe retry/navigation options.']
+    acceptance: ['No secrets/raw connection strings returned.', 'Agent cannot change DB to “fix” errors directly.']
+
+  - id: NEWAPP-059
+    phase: P11
+    title: Verify cross-terminal master data immediacy
+    depends_on: [NEWAPP-022, NEWAPP-024, NEWAPP-049]
+    actions: ['Create/update customer and supplier in NEWAPP and verify NEWERP reads same records.', 'Edit in NEWERP and verify NEWAPP sees it after refresh/change feed.']
+    acceptance: ['No synchronization job or duplicate copy is required.']
+  - id: NEWAPP-060
+    phase: P11
+    title: Expose mobile inquiry data to NEWERP PC workflows
+    depends_on: [NEWAPP-029, NEWAPP-003]
+    actions: ['Add reviewed NEWERP repository/view/service access to app.InquiryTrip/SupplierVisit/InquiryRevision.', 'Define how PC ERP converts submitted inquiry into quotation/purchase workflow without copying source data unnecessarily.']
+    acceptance: ['NEWERP can open submitted NEWAPP inquiry by ID and see same revision/images.', 'Conversion action is idempotent and audited.']
+  - id: NEWAPP-061
+    phase: P11
+    title: Shared OSS image visibility across NEWERP and NEWAPP
+    depends_on: [NEWAPP-032, NEWAPP-060]
+    actions: ['Verify NEWERP uses same object metadata/key rules or add shared resolver.', 'Avoid re-upload/copy between systems.']
+    acceptance: ['A product photo uploaded by NEWAPP is displayed by NEWERP using same stored object.']
+  - id: NEWAPP-062
+    phase: P11
+    title: Shared dictionary and permission alignment
+    depends_on: [NEWAPP-003, NEWAPP-020]
+    actions: ['Use existing NEWERP currency/unit/material/color/organization dictionaries where authoritative.', 'Document any app-only dictionary separately.']
+    acceptance: ['No conflicting code sets between PC and mobile.']
+
+  - id: NEWAPP-063
+    phase: P12
+    title: Security hardening
+    depends_on: [NEWAPP-058, NEWAPP-062]
+    actions: ['Threat model auth, tenant isolation, signed upload, object access, agent tools, offline cache and logs.', 'Run dependency and secret scans.']
+    acceptance: ['No critical/high unresolved finding.', 'Lost/revoked device token can be invalidated.']
+  - id: NEWAPP-064
+    phase: P12
+    title: Performance and load testing
+    depends_on: [NEWAPP-051, NEWAPP-061]
+    actions: ['Test 1000 suppliers search, 100-item visit, batch OCR queue, Excel generation and change feed.', 'Profile DB indexes.']
+    acceptance: ['Meet documented SLA targets or record approved exceptions.']
+  - id: NEWAPP-065
+    phase: P12
+    title: Mobile visual regression matrix
+    depends_on: [NEWAPP-054, NEWAPP-057]
+    actions: ['Capture key screens across supported Android/iOS/HarmonyOS sizes.', 'Test default/custom theme and large text.']
+    acceptance: ['No clipping/overlap; screenshot baseline approved by GPT review.']
+  - id: NEWAPP-066
+    phase: P12
+    title: Release/update pipeline
+    depends_on: [NEWAPP-063, NEWAPP-064, NEWAPP-065]
+    actions: ['Build/sign channels, version policy, force/optional update, release notes and rollback.', 'Platform-specific store packaging.']
+    acceptance: ['Staging release installable on each platform.', 'Forced minimum version can be tested without locking out admin recovery.']
+  - id: NEWAPP-067
+    phase: P12
+    title: Final business-day acceptance test
+    depends_on: [NEWAPP-066]
+    actions: ['Run realistic scenario with customer, multiple stores, single/batch capture, OCR corrections, offline period, submissions, Excel and NEWERP PC visibility.']
+    acceptance: ['All critical workflow evidence is archived.', 'No P0/P1 defect remains.']
+  - id: NEWAPP-068
+    phase: P12
+    title: Freeze V1 and generate next backlog
+    depends_on: [NEWAPP-067]
+    actions: ['Tag release.', 'Generate architecture decision records and deferred backlog from actual evidence.', 'Keep GPT as brain for next iteration.']
+    acceptance: ['Release tag and reproducible build metadata exist.', 'Next tasks are machine-readable and traceable to evidence.']
