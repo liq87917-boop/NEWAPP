@@ -1,0 +1,19 @@
+{
+  "task_id": "NEWAPP-003",
+  "decision": "execute",
+  "rationale": "Inspect the actual shared NEWERP SQL Server schema read-only so all later repositories and mobile APIs bind to existing master/business tables instead of inventing duplicate structures.",
+  "validation_focus": [
+    "Use the server-side .env connection only in memory; never print or persist the connection string or credentials.",
+    "Execute metadata/catalog reads only. No DDL, DML, migration, stored-procedure execution, or business-row export.",
+    "Identify actual customer, supplier, user, tenant/company, dictionary, inquiry-related tables plus keys, indexes and rowversion/concurrency columns.",
+    "Produce docs/NEWERP_SCHEMA_MAP.md and a value-safe machine-readable mapping under .ai/generated, with tests that reject secret/data-value leakage."
+  ],
+  "risks": [
+    "Do not infer table names when metadata is unavailable; mark unknowns explicitly.",
+    "Do not alter shared SQL Server objects or NEWERP code.",
+    "Do not place any production/business row values in Git evidence."
+  ],
+  "actor": "Codex GPT Hourly Rolling Planner",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T12:00:00Z"
+}
