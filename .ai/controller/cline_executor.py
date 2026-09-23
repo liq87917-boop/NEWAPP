@@ -12,6 +12,64 @@ from typing import Any
 from common import ROOT, config, read_env, redact, runtime_env, utc_now
 
 
+_NOISY_AGENT_EVENTS = {"content_start", "content_delta", "content_end"}
+
+
+def console_message(line: str) -> str | None:
+    """Return a compact human-facing message for one Cline JSON-stream line.
+
+    The full redacted line is still written to the audit log. Low-level
+    reasoning/content token events are intentionally hidden from the DOS
+    console so unattended runs stay readable.
+    """
+    text = line.strip()
+    if not text:
+        return None
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return text
+
+    if not isinstance(payload, dict):
+        return None
+
+    message_type = str(payload.get("type", ""))
+    if message_type == "agent_event":
+        event = payload.get("event")
+        if not isinstance(event, dict):
+            return None
+        event_type = str(event.get("type", ""))
+        if event_type in _NOISY_AGENT_EVENTS:
+            return None
+        if event_type in {"error", "failed", "failure"}:
+            detail = event.get("message") or event.get("error") or event.get("reason") or "unknown error"
+            return f"[Cline] ERROR: {detail}"
+        if event_type in {"tool_start", "tool_use", "tool_call"}:
+            name = event.get("name") or event.get("tool") or event.get("toolName") or "tool"
+            return f"[Cline] tool: {name}"
+        if event_type in {"tool_end", "tool_result", "tool_complete"}:
+            name = event.get("name") or event.get("tool") or event.get("toolName") or "tool"
+            return f"[Cline] tool complete: {name}"
+        if event_type in {"task_start", "task_started"}:
+            return "[Cline] task started"
+        if event_type in {"task_end", "task_completed", "completed"}:
+            return "[Cline] task completed"
+        return None
+
+    if message_type in {"error", "fatal"}:
+        detail = payload.get("message") or payload.get("error") or text
+        return f"[Cline] ERROR: {detail}"
+
+    # Some CLI versions emit a compact final message outside agent_event.
+    if message_type in {"result", "completion", "final"}:
+        message = payload.get("message") or payload.get("text") or payload.get("content")
+        if isinstance(message, str) and message.strip():
+            one_line = " ".join(message.split())
+            return f"[Cline] {one_line[:500]}"
+
+    return None
+
+
 def build_prompt(task: dict[str, Any], plan: dict[str, Any], allowed_paths: list[str]) -> str:
     rules = (ROOT / config()["sources"]["executor_rules"]).read_text(encoding="utf-8")
     payload = {
@@ -85,6 +143,7 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
     reader_done = False
     deadline = time.monotonic() + timeout
     no_output = object()
+    last_console_heartbeat = time.monotonic()
     with log_path.open("w", encoding="utf-8", newline="\n") as log:
         while True:
             try:
@@ -97,14 +156,23 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
             elif item is not no_output:
                 cleaned = redact(str(item).rstrip("\r\n"), secret_env)
                 if cleaned:
-                    print(cleaned, flush=True)
                     log.write(cleaned + "\n")
                     log.flush()
+                    compact = console_message(cleaned)
+                    if compact:
+                        print(compact, flush=True)
+                        last_console_heartbeat = time.monotonic()
 
             if process.poll() is not None and reader_done:
                 break
 
-            if process.poll() is None and time.monotonic() >= deadline:
+            now = time.monotonic()
+            if process.poll() is None and now - last_console_heartbeat >= 30:
+                elapsed_seconds = int(now - (deadline - timeout))
+                print(f"[Cline] {task['id']} running... {elapsed_seconds}s", flush=True)
+                last_console_heartbeat = now
+
+            if process.poll() is None and now >= deadline:
                 timed_out = True
                 process.kill()
 
