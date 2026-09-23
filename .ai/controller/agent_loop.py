@@ -5,6 +5,7 @@ import contextlib
 import json
 import os
 import sys
+import time
 import uuid
 from pathlib import Path
 from typing import Any, Iterator
@@ -20,7 +21,7 @@ from common import ROOT, audit, atomic_json, config, git, read_env, save_state, 
 from evidence import build as build_evidence
 from git_manager import changed_paths, guard_changes, has_head, is_repository
 from gpt_brain import load_plan, record_plan, record_review, request_plan, request_review
-from github_relay import finalize_review, prepare_task_branch, preflight as github_preflight, publish_branch_metadata, publish_candidate, publish_control_update
+from github_relay import finalize_review, prepare_task_branch, preflight as github_preflight, publish_branch_metadata, publish_candidate, publish_control_update, refresh_base, return_to_base
 from task_loader import effective_status, load_tasks, queue_head, requires_human_gate
 from validator import runtime_checks, validate
 
@@ -244,17 +245,32 @@ def run_one(*, plan_only: bool = False) -> int:
                 "github_relay_mode": relay.get("relay_mode", "git_branch"),
             })
             atomic_json(review_request, request_value)
+            publish_branch_metadata(f"{task['id']}: attach GPT review metadata", [relative_request], branch)
+
+            # Rolling mode: immediately return to main, persist only queue metadata
+            # there, then continue with another dependency-safe task.
+            return_to_base()
+            main_state = state()
             set_task_status(
-                project_state,
+                main_state,
                 task["id"],
                 "awaiting_review",
+                run_id=run_id,
+                branch=branch,
+                attempts=previous_attempts + 1,
+                evidence_manifest=manifest["manifest_path"],
+                changed_paths=manifest["path_guard"]["changed_paths"],
+                review_request=relative_request,
                 github_pr=relay.get("pr_url"),
                 github_review_url=relay.get("review_url"),
                 github_relay_mode=relay.get("relay_mode", "git_branch"),
-                branch=branch,
             )
-            save_state(project_state)
-            publish_branch_metadata(f"{task['id']}: attach GPT review metadata", [relative_request, ".ai/project_state.json"], branch)
+            save_state(main_state, phase="rolling", current_task=None, blocker=None, last_run_id=run_id, last_validation=validation)
+            audit("candidate_published_for_hourly_review", task_id=task["id"], run_id=run_id, branch=branch)
+            publish_control_update(
+                f"{task['id']}: candidate awaiting hourly GPT review",
+                [".ai/project_state.json", ".ai/audit.jsonl"],
+            )
         except Exception as exc:
             set_task_status(project_state, task["id"], "blocked", error=str(exc), run_id=run_id, branch=branch)
             save_state(project_state, phase="blocked", blocker=str(exc))
@@ -485,10 +501,32 @@ def main() -> int:
     if command == "record-plan": return record_plan_command(args)
     if command == "record-review": return record_review_command(args)
     if command == "run":
+        rolling = config().get("rolling_queue", {})
+        poll_seconds = max(10, int(rolling.get("idle_poll_seconds", 60)))
+        continue_codes = {12, 13, 16, 17}
+        print(
+            f"Rolling mode active: target={rolling.get('target_size', 4)} "
+            f"idle_poll={poll_seconds}s hourly_review={rolling.get('review_interval_minutes', 60)}m",
+            flush=True,
+        )
         while True:
             result = run_one()
-            if result != 0: return result
-            if queue_head(load_tasks(), state()).reason == "queue_empty": return 0
+            if result in continue_codes:
+                continue
+            snapshot = queue_head(load_tasks(), state())
+            if snapshot.reason == "queue_empty":
+                return 0
+            if result == 10 and snapshot.reason.startswith("no_runnable_tasks"):
+                print(f"[Rolling] {snapshot.reason}", flush=True)
+                print(f"[Rolling] Waiting {poll_seconds}s for GPT review / dependency unlock...", flush=True)
+                time.sleep(poll_seconds)
+                try:
+                    refresh_base()
+                except Exception as exc:
+                    print(f"[Rolling] GitHub refresh failed: {exc}", file=sys.stderr)
+                    return 24
+                continue
+            return result
     return 2
 
 
