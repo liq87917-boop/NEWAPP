@@ -12,6 +12,9 @@ def validate(task: dict[str, Any], run_id: str, profile: str = "safe") -> dict[s
     commands = settings["profiles"].get(profile)
     if not commands:
         raise RuntimeError(f"Unknown validation profile: {profile}")
+    commands = [list(command) for command in commands]
+    task_commands = settings.get("task_commands", {}).get(task.get("id"), [])
+    commands.extend(list(command) for command in task_commands)
     forbidden = {str(token).lower() for token in settings.get("dangerous_command_tokens", [])}
     steps: list[dict[str, Any]] = []
     log_path = ROOT / config()["evidence"]["logs_dir"] / f"{run_id}-validation.log"
