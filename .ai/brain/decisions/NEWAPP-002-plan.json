@@ -1,0 +1,20 @@
+{
+  "task_id": "NEWAPP-002",
+  "decision": "execute",
+  "rationale": "Document the existing local configuration contract using key names and presence booleans only. Preserve .env byte-for-byte and produce a safe binding map for NEWAPP services without adding a second database, OSS bucket, or synchronization layer.",
+  "validation_focus": [
+    "Read and record only variable names and configured/missing booleans; never record, hash, quote, compare, or print values.",
+    "Do not modify, rename, normalize, overwrite, stage, or copy .env or agent.env.",
+    "Classify existing names into database, shared OSS, authentication, AI provider, and application settings; unknown names may be listed by name only.",
+    "Generate docs/CONFIGURATION_CONTRACT.md and .ai/generated/NEWAPP-002-env-contract.json plus focused tests that prove reports contain no values or assignment lines.",
+    "Binding documentation must state NEWAPP and NEWERP share the same database and OSS and require no data-sync service; mobile clients never connect directly to SQL Server or embed OSS credentials."
+  ],
+  "risks": [
+    "A diagnostic may accidentally echo values or raw .env lines; parse names in memory and emit only allowlisted fields.",
+    "Do not connect to DB/OSS/auth/AI services and do not mutate any external system.",
+    "Do not change protected control-plane files, Git remotes, or NEWERP."
+  ],
+  "actor": "Codex GPT Desktop/Mobile Remote",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T11:10:02.148733Z"
+}
