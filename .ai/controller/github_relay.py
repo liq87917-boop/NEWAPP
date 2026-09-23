@@ -111,13 +111,16 @@ def publish_candidate(
     settings = _settings()
     if current_branch() != branch:
         raise RuntimeError("Current branch does not match the task branch")
-    ordinary = sorted(set(paths + [".ai/project_state.json", ".ai/audit.jsonl", review_request]))
+    ordinary = sorted(set(paths + [review_request]))
     _checked(["git", "add", "--", *ordinary], "Cannot stage task candidate")
     _checked(["git", "add", "-f", "--", manifest_path], "Cannot stage evidence manifest")
     if git(["diff", "--cached", "--quiet"]).returncode == 0:
         raise RuntimeError("Task produced no publishable changes")
     _checked(["git", "commit", "-m", f"{task['id']}: candidate for GPT review"], "Cannot commit task candidate")
     _checked(["git", "push", "-u", settings["remote"], branch], "Cannot push task branch")
+    # Runtime state/audit belong to main in rolling mode; do not merge branch-local
+    # snapshots back later and overwrite newer queue/review information.
+    git(["restore", "--", ".ai/project_state.json", ".ai/audit.jsonl"])
     encoded_branch = quote(branch, safe="/-_.")
     review_url = f"{_repo_web_url()}/tree/{encoded_branch}"
     return {
@@ -127,6 +130,30 @@ def publish_candidate(
         "pr_url": None,
         "relay_mode": "git_branch",
     }
+
+
+def return_to_base() -> None:
+    settings = _settings()
+    base = str(settings["base_branch"])
+    remote = str(settings["remote"])
+    if git(["status", "--porcelain"]).stdout.strip():
+        raise RuntimeError("Cannot return to main with a dirty task branch")
+    if current_branch() != base:
+        _checked(["git", "switch", base], "Cannot return to main")
+    _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
+    _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
+
+
+def refresh_base() -> None:
+    settings = _settings()
+    base = str(settings["base_branch"])
+    remote = str(settings["remote"])
+    if current_branch() != base:
+        raise RuntimeError("Idle refresh requires the base branch")
+    if git(["status", "--porcelain"]).stdout.strip():
+        raise RuntimeError("Idle refresh requires a clean working tree")
+    _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
+    _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
 
 
 def publish_branch_metadata(message: str, paths: list[str], branch: str) -> None:
