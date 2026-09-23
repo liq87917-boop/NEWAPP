@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import queue
 import shutil
+import subprocess
+import threading
 from pathlib import Path
 from typing import Any
 
-from common import ROOT, config, redact, run, runtime_env, utc_now
+from common import ROOT, config, read_env, redact, runtime_env, utc_now
 
 
 def build_prompt(task: dict[str, Any], plan: dict[str, Any], allowed_paths: list[str]) -> str:
@@ -24,7 +27,10 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
     executable = shutil.which(settings["cline_command"])
     if not executable:
         raise RuntimeError(f"Cline command not found: {settings['cline_command']}")
+
     log_path = ROOT / config()["evidence"]["logs_dir"] / f"{run_id}-cline.jsonl"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
     prompt = build_prompt(task, plan, allowed_paths)
     command = [
         executable,
@@ -39,9 +45,80 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
         str(settings["cline_timeout_seconds"]),
         prompt,
     ]
+
     started = utc_now()
-    result = run(command, timeout=int(settings["cline_timeout_seconds"]) + 30, env=runtime_env())
-    output = redact((result.stdout or "") + ("\n" + result.stderr if result.stderr else ""))
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(output, encoding="utf-8", newline="\n")
-    return {"started_at": started, "finished_at": utc_now(), "exit_code": result.returncode, "log": str(log_path.relative_to(ROOT)).replace("\\", "/")}
+    env = runtime_env()
+    secret_env = read_env(ROOT / config()["environment"]["file"])
+    timeout = int(settings["cline_timeout_seconds"]) + 30
+
+    print(f"[Cline] Starting {task['id']} with provider={settings['cline_provider']}", flush=True)
+    print(f"[Cline] Live log: {log_path.relative_to(ROOT)}", flush=True)
+
+    process = subprocess.Popen(
+        command,
+        cwd=ROOT,
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=1,
+        shell=False,
+    )
+
+    output_queue: queue.Queue[str | None] = queue.Queue()
+
+    def reader() -> None:
+        assert process.stdout is not None
+        try:
+            for raw_line in process.stdout:
+                output_queue.put(raw_line)
+        finally:
+            output_queue.put(None)
+
+    thread = threading.Thread(target=reader, name=f"cline-output-{task['id']}", daemon=True)
+    thread.start()
+
+    timed_out = False
+    reader_done = False
+    with log_path.open("w", encoding="utf-8", newline="\n") as log:
+        while True:
+            try:
+                item = output_queue.get(timeout=0.2)
+            except queue.Empty:
+                item = "__NO_OUTPUT__"
+
+            if item is None:
+                reader_done = True
+            elif item != "__NO_OUTPUT__":
+                cleaned = redact(item.rstrip("\r\n"), secret_env)
+                if cleaned:
+                    print(cleaned, flush=True)
+                    log.write(cleaned + "\n")
+                    log.flush()
+
+            if process.poll() is not None and reader_done:
+                break
+
+            elapsed = (Path(log_path).stat().st_mtime if log_path.exists() else 0)
+            # Timeout enforcement is delegated to Cline's own --timeout flag.
+            # The outer controller still retains a hard kill fallback below.
+
+        try:
+            exit_code = process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            process.kill()
+            exit_code = process.wait(timeout=5)
+
+    if timed_out:
+        print(f"[Cline] {task['id']} exceeded shutdown grace period and was terminated.", flush=True)
+
+    print(f"[Cline] {task['id']} exited with code {exit_code}", flush=True)
+    return {
+        "started_at": started,
+        "finished_at": utc_now(),
+        "exit_code": exit_code,
+        "log": str(log_path.relative_to(ROOT)).replace("\\", "/"),
+    }
