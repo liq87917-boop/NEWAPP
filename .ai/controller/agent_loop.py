@@ -252,6 +252,103 @@ def run_one(*, plan_only: bool = False) -> int:
         return 17
 
 
+def recover_stale(args: argparse.Namespace) -> int:
+    """Recover an orphaned local execution after the controller process was interrupted."""
+    with controller_lock():
+        project_state = state()
+        task_ids = {task["id"] for task in load_tasks()}
+        task_id = args.task_id
+        if task_id not in task_ids:
+            print(f"Unknown task: {task_id}", file=sys.stderr)
+            return 2
+
+        entry = project_state.get("task_statuses", {}).get(task_id, {})
+        current_status = str(entry.get("status", "queued"))
+        recoverable = {"executing", "code_ready", "validating"}
+        if current_status not in recoverable:
+            print(f"{task_id} status={current_status} is not an orphan-recoverable state", file=sys.stderr)
+            return 3
+
+        settings = config()["github_relay"]
+        base_branch = str(settings["base_branch"])
+        remote = str(settings["remote"])
+        recorded_branch = str(entry.get("branch") or "")
+        run_id = str(entry.get("run_id") or "")
+        branch_result = git(["branch", "--show-current"])
+        if branch_result.returncode != 0:
+            print((branch_result.stderr or branch_result.stdout).strip(), file=sys.stderr)
+            return 4
+        current_branch = branch_result.stdout.strip()
+
+        if current_branch != base_branch:
+            if recorded_branch and current_branch != recorded_branch:
+                print(
+                    f"Refusing recovery: current branch {current_branch} does not match recorded task branch {recorded_branch}",
+                    file=sys.stderr,
+                )
+                return 5
+            dirty = bool(git(["status", "--porcelain"]).stdout.strip())
+            stash_created = False
+            if dirty:
+                stash_message = f"NEWAPP recovery {task_id} {run_id or 'unknown-run'}"
+                stash = git(["stash", "push", "-u", "-m", stash_message])
+                if stash.returncode != 0:
+                    print(f"Cannot preserve orphaned work: {(stash.stderr or stash.stdout).strip()}", file=sys.stderr)
+                    return 6
+                stash_created = True
+            switch = git(["switch", base_branch])
+            if switch.returncode != 0:
+                print(f"Cannot return to {base_branch}: {(switch.stderr or switch.stdout).strip()}", file=sys.stderr)
+                return 7
+            pull = git(["pull", "--ff-only", remote, base_branch])
+            if pull.returncode != 0:
+                print(f"Cannot refresh {base_branch}: {(pull.stderr or pull.stdout).strip()}", file=sys.stderr)
+                return 8
+        else:
+            stash_created = False
+
+        # Reload main after switching branches so an orphaned branch-local state file
+        # cannot overwrite a newer control decision already published to GitHub.
+        project_state = state()
+        set_task_status(
+            project_state,
+            task_id,
+            "retry",
+            recovery={
+                "reason": args.reason,
+                "by": args.by,
+                "orphaned_status": current_status,
+                "orphaned_run_id": run_id or None,
+                "orphaned_branch": recorded_branch or None,
+                "work_preserved_in_stash": stash_created,
+            },
+        )
+        save_state(project_state, phase="ready", current_task=None, blocker=None)
+        audit(
+            "orphaned_execution_recovered",
+            task_id=task_id,
+            previous_status=current_status,
+            run_id=run_id or None,
+            branch=recorded_branch or None,
+            work_preserved_in_stash=stash_created,
+            by=args.by,
+            reason=args.reason,
+        )
+        relay = publish_control_update(
+            f"{task_id}: recover orphaned execution",
+            [".ai/project_state.json", ".ai/audit.jsonl"],
+        )
+        print(json.dumps({
+            "status": "recovered",
+            "task_id": task_id,
+            "previous_status": current_status,
+            "next_status": "retry",
+            "work_preserved_in_stash": stash_created,
+            "github": relay,
+        }, ensure_ascii=False, indent=2))
+        return 0
+
+
 def approve(args: argparse.Namespace) -> int:
     task_ids = {task["id"] for task in load_tasks()}
     if args.task_id not in task_ids:
@@ -346,6 +443,8 @@ def main() -> int:
     sub.add_parser("resume")
     retry_parser = sub.add_parser("retry")
     retry_parser.add_argument("task_id"); retry_parser.add_argument("--by", required=True); retry_parser.add_argument("--reason", required=True)
+    recover_parser = sub.add_parser("recover")
+    recover_parser.add_argument("task_id"); recover_parser.add_argument("--by", default="Codex GPT Recovery"); recover_parser.add_argument("--reason", default="Controller process was interrupted and left an orphaned execution state")
     plan_parser = sub.add_parser("record-plan")
     plan_parser.add_argument("task_id"); plan_parser.add_argument("--decision", choices=["execute", "human_gate", "block"], required=True); plan_parser.add_argument("--rationale", required=True); plan_parser.add_argument("--validation-focus", action="append", default=[]); plan_parser.add_argument("--risk", action="append", default=[]); plan_parser.add_argument("--by", default="Codex GPT Desktop/Mobile Remote")
     review_parser = sub.add_parser("record-review")
@@ -360,6 +459,7 @@ def main() -> int:
     if command == "pause": return pause_resume(True, args.reason)
     if command == "resume": return pause_resume(False)
     if command == "retry": return retry(args)
+    if command == "recover": return recover_stale(args)
     if command == "record-plan": return record_plan_command(args)
     if command == "record-review": return record_review_command(args)
     if command == "run":
