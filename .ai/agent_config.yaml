@@ -28,6 +28,17 @@
     "decisions_dir": ".ai/brain/decisions",
     "api_key_required": false
   },
+  "github_relay": {
+    "enabled": true,
+    "repository": "liq87917-boop/NEWAPP",
+    "remote": "origin",
+    "remote_url": "https://github.com/liq87917-boop/NEWAPP.git",
+    "base_branch": "main",
+    "branch_prefix": "agent/",
+    "require_private": true,
+    "require_pull_request": true,
+    "merge_method": "squash"
+  },
   "queue": {
     "runnable_states": ["queued", "retry"],
     "terminal_states": ["completed", "deferred", "skipped"],
@@ -35,7 +46,7 @@
     "fail_closed": true
   },
   "paths": {
-    "protected": [".env", ".env.*", "agent.env", "agent.env.*", ".ai/controller/**", ".ai/agent_config.yaml", ".ai/project_state.json", ".ai/decisions/**", ".ai/locks/**", ".clinerules", "start_agent.bat", "**/*.pfx", "**/*.p12", "**/*.jks", "**/*.keystore", "**/*.pem", "**/*.key"],
+    "protected": [".env", ".env.*", "agent.env", "agent.env.*", ".ai/controller/**", ".ai/agent_config.yaml", ".ai/project_state.json", ".ai/decisions/**", ".ai/brain/**", ".ai/locks/**", ".github/workflows/**", ".clinerules", "start_agent.bat", "**/*.pfx", "**/*.p12", "**/*.jks", "**/*.keystore", "**/*.pem", "**/*.key"],
     "executor_allowed": ["src/**", "tests/**", "docs/**", "database/**", ".github/**", ".ai/generated/**", "*.sln", "*.md", ".gitignore"]
   },
   "human_gate": {

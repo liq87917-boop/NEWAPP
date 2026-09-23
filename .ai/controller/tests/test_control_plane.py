@@ -47,6 +47,13 @@ class ControlPlaneContractTests(unittest.TestCase):
         self.assertEqual("codex_remote_file_bridge", settings["mode"])
         self.assertFalse(settings["api_key_required"])
 
+    def test_github_relay_is_private_pr_only(self) -> None:
+        settings = config()["github_relay"]
+        self.assertTrue(settings["enabled"])
+        self.assertTrue(settings["require_private"])
+        self.assertTrue(settings["require_pull_request"])
+        self.assertEqual("main", settings["base_branch"])
+
 
 if __name__ == "__main__":
     unittest.main()

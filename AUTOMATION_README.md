@@ -45,4 +45,8 @@ Running `start_agent.bat` with no arguments performs a safe preflight only. It d
 
 Register `D:\VSCodeProject\NEWAPP` as a local Codex project on the Windows host. In the ChatGPT mobile app, open Remote, choose that connected Windows host and the NEWAPP workspace, then open or start the NEWAPP control task. The phone supplies planning, steering, approvals, and final review; Cline/DeepSeek and all builds/tests continue to run on the Windows host. Keep the host online and signed in. Desktop and mobile use the same `.ai/brain/requests/` and `.ai/brain/decisions/` handshake.
 
+## GitHub relay
+
+The private repository `liq87917-boop/NEWAPP` is the cross-device relay. GPT plan decisions are committed to `main`. Each DeepSeek/Cline attempt runs on an `agent/NEWAPP-*` branch and is published as a Pull Request with a redacted evidence manifest. The PR is never merged merely because Cline exits successfully. Codex GPT on desktop or mobile Remote records the final decision; only `accept` triggers a squash merge. Rejections stay on the PR with the reason and required fixes.
+
 Human approvals are local runtime records under `.ai/decisions/` and are ignored by Git by default. Approval never permits `DROP`, `TRUNCATE`, production deployment, production DML, or use of production data in tests.

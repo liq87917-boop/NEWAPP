@@ -115,7 +115,7 @@ def redact(text: str, env: dict[str, str] | None = None) -> str:
 
 
 def run(command: list[str], *, timeout: int | None = None, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=ROOT, env=env, text=True, capture_output=True, timeout=timeout, shell=False)
+    return subprocess.run(command, cwd=ROOT, env=env, text=True, encoding="utf-8", errors="replace", capture_output=True, timeout=timeout, shell=False)
 
 
 def git(args: list[str]) -> subprocess.CompletedProcess[str]:

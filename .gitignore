@@ -26,10 +26,6 @@ __pycache__/
 !.ai/locks/.gitkeep
 .ai/decisions/*
 !.ai/decisions/.gitkeep
-.ai/brain/requests/*
-!.ai/brain/requests/.gitkeep
-.ai/brain/decisions/*
-!.ai/brain/decisions/.gitkeep
 .ai/runtime/*
 bin/
 obj/

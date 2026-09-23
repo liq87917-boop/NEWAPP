@@ -1,0 +1,33 @@
+name: NEWAPP Control Plane
+
+on:
+  push:
+    branches: [main, 'agent/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-controller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compile controller
+        run: python -m compileall -q .ai/controller
+      - name: Run controller contract tests
+        run: python -m unittest discover -s .ai/controller/tests -p 'test_*.py'
+      - name: Reject tracked secret files
+        shell: bash
+        run: |
+          if git ls-files | grep -E '(^|/)(\.env($|\.)|agent\.env($|\.)|.*\.(pfx|p12|jks|keystore|pem|key)$)'; then
+            echo 'Sensitive file path is tracked.' >&2
+            exit 1
+          fi
+

@@ -18,8 +18,9 @@ from cline_executor import execute
 from browser_acceptance import evaluate as browser_acceptance
 from common import ROOT, audit, atomic_json, config, git, read_env, save_state, state, utc_now
 from evidence import build as build_evidence
-from git_manager import changed_paths, checkpoint, guard_changes, has_head, is_repository
+from git_manager import changed_paths, guard_changes, has_head, is_repository
 from gpt_brain import load_plan, record_plan, record_review, request_plan, request_review
+from github_relay import finalize_review, prepare_task_branch, preflight as github_preflight, publish_branch_metadata, publish_candidate, publish_control_update
 from task_loader import effective_status, load_tasks, queue_head, requires_human_gate
 from validator import runtime_checks, validate
 
@@ -87,6 +88,8 @@ def preflight(write_state: bool = True) -> int:
     checks = runtime_checks()
     if not checks["cline"]:
         blockers.append("Cline CLI is unavailable")
+    relay = github_preflight()
+    blockers.extend(relay["blockers"])
     result = {
         "status": "ready" if not blockers else "blocked",
         "project": cfg["project"]["name"],
@@ -96,6 +99,7 @@ def preflight(write_state: bool = True) -> int:
         "runtime": checks,
         "git": {"repository": git_ok, "baseline_commit": head_ok},
         "brain": {"mode": cfg["brain"]["mode"], "api_key_required": False},
+        "github_relay": relay,
         "blockers": blockers,
         "safe_default": "preflight_only_no_business_task_started",
     }
@@ -154,6 +158,14 @@ def run_one(*, plan_only: bool = False) -> int:
             set_task_status(project_state, task["id"], "awaiting_brain", request=relative_request)
             save_state(project_state, phase="awaiting_codex_gpt", current_task=task["id"], blocker="Codex desktop/mobile GPT plan decision required")
             audit("desktop_brain_plan_requested", task_id=task["id"], request=relative_request)
+            try:
+                relay = publish_control_update(f"{task['id']}: request GPT plan", [relative_request, ".ai/project_state.json", ".ai/audit.jsonl"])
+            except Exception as exc:
+                set_task_status(project_state, task["id"], "blocked", error=str(exc))
+                save_state(project_state, phase="blocked", blocker=str(exc))
+                audit("github_plan_request_publish_failed", task_id=task["id"], error=str(exc))
+                print(f"GitHub plan request publication failed: {exc}", file=sys.stderr)
+                return 19
             print(json.dumps({"status": "awaiting_codex_gpt", "task_id": task["id"], "request": relative_request}, ensure_ascii=False, indent=2))
             return 16
         audit("brain_plan", task_id=task["id"], decision=decision["decision"], rationale=decision["rationale"])
@@ -169,15 +181,23 @@ def run_one(*, plan_only: bool = False) -> int:
             print(json.dumps(decision, ensure_ascii=False, indent=2))
             return 0
         run_id = utc_now().replace("-", "").replace(":", "").replace(".", "") + "-" + uuid.uuid4().hex[:8]
-        before = set(changed_paths())
+        try:
+            branch = prepare_task_branch(task["id"], run_id)
+        except Exception as exc:
+            set_task_status(project_state, task["id"], "blocked", error=str(exc), run_id=run_id)
+            save_state(project_state, phase="blocked", blocker=str(exc))
+            audit("github_branch_prepare_failed", task_id=task["id"], run_id=run_id, error=str(exc))
+            print(f"GitHub relay could not prepare task branch: {exc}", file=sys.stderr)
+            return 18
         previous_attempts = int(project_state.setdefault("task_statuses", {}).setdefault(task["id"], {}).get("attempts", 0))
         max_attempts = int(config()["runtime"].get("max_attempts_per_task", 3))
         if previous_attempts >= max_attempts:
             set_task_status(project_state, task["id"], "failed", error="maximum attempts exhausted")
             save_state(project_state, phase="failed", blocker="maximum attempts exhausted")
             return 15
-        set_task_status(project_state, task["id"], "executing", run_id=run_id, attempts=previous_attempts + 1)
+        set_task_status(project_state, task["id"], "executing", run_id=run_id, branch=branch, attempts=previous_attempts + 1)
         save_state(project_state, phase="executing", last_run_id=run_id)
+        before = set(changed_paths())
         try:
             executor_result = execute(task, decision, run_id, allowed_paths(task))
         except Exception as exc:
@@ -213,7 +233,21 @@ def run_one(*, plan_only: bool = False) -> int:
         set_task_status(project_state, task["id"], "awaiting_review", run_id=run_id, evidence_manifest=manifest["manifest_path"], changed_paths=manifest["path_guard"]["changed_paths"], review_request=relative_request)
         save_state(project_state, phase="awaiting_codex_gpt_review", last_validation=validation, blocker="Codex desktop/mobile GPT final review required")
         audit("desktop_brain_review_requested", task_id=task["id"], run_id=run_id, request=relative_request)
-        print(json.dumps({"status": "awaiting_codex_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request}, ensure_ascii=False, indent=2))
+        try:
+            relay = publish_candidate(task, run_id, branch, manifest["path_guard"]["changed_paths"], manifest["manifest_path"], relative_request)
+            request_value = json.loads(review_request.read_text(encoding="utf-8"))
+            request_value.update({"github_pr": relay["pr_url"], "github_branch": branch})
+            atomic_json(review_request, request_value)
+            set_task_status(project_state, task["id"], "awaiting_review", github_pr=relay["pr_url"], branch=branch)
+            save_state(project_state)
+            publish_branch_metadata(f"{task['id']}: attach GPT review metadata", [relative_request, ".ai/project_state.json"], branch)
+        except Exception as exc:
+            set_task_status(project_state, task["id"], "blocked", error=str(exc), run_id=run_id, branch=branch)
+            save_state(project_state, phase="blocked", blocker=str(exc))
+            audit("github_candidate_publish_failed", task_id=task["id"], run_id=run_id, error=str(exc))
+            print(f"GitHub candidate publication failed: {exc}", file=sys.stderr)
+            return 23
+        print(json.dumps({"status": "awaiting_codex_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request, "github_pr": relay["pr_url"]}, ensure_ascii=False, indent=2))
         return 17
 
 
@@ -262,7 +296,12 @@ def record_plan_command(args: argparse.Namespace) -> int:
     set_task_status(project_state, args.task_id, next_status, brain_decision=str(path.relative_to(ROOT)).replace("\\", "/"))
     save_state(project_state, phase="ready" if next_status == "retry" else next_status, current_task=None if next_status == "retry" else args.task_id, blocker=None if next_status == "retry" else args.rationale)
     audit("desktop_brain_plan_recorded", task_id=args.task_id, decision=args.decision, actor=args.by)
-    print(str(path))
+    paths = [str(path.relative_to(ROOT)).replace("\\", "/"), ".ai/project_state.json", ".ai/audit.jsonl"]
+    request_path = ROOT / config()["brain"]["requests_dir"] / f"{args.task_id}-plan-request.json"
+    if request_path.exists():
+        paths.append(str(request_path.relative_to(ROOT)).replace("\\", "/"))
+    relay = publish_control_update(f"{args.task_id}: GPT plan decision", paths)
+    print(json.dumps({"decision": str(path), "github": relay}, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -281,13 +320,14 @@ def record_review_command(args: argparse.Namespace) -> int:
         set_task_status(project_state, args.task_id, next_status, review=review)
         save_state(project_state, phase=next_status, blocker=args.rationale, last_review=review)
         audit("desktop_brain_review_recorded", task_id=args.task_id, run_id=args.run_id, decision=args.decision, actor=args.by)
+        relay = finalize_review(args.task_id, str(entry["branch"]), args.decision, [str(path.relative_to(ROOT)).replace("\\", "/"), ".ai/project_state.json", ".ai/audit.jsonl"], args.rationale)
+        print(json.dumps({"task": args.task_id, "status": next_status, "github": relay}, ensure_ascii=False, indent=2))
         return 0
-    changed = [str(item) for item in entry.get("changed_paths", [])]
-    commit_result = checkpoint(args.task_id, str(task.get("title", "task")), changed) if config()["runtime"].get("auto_commit_after_acceptance") else {"status": "disabled"}
-    set_task_status(project_state, args.task_id, "completed", review=review, run_id=args.run_id, checkpoint=commit_result)
+    set_task_status(project_state, args.task_id, "completed", review=review, run_id=args.run_id)
     save_state(project_state, phase="ready", current_task=None, last_completed_task=args.task_id, blocker=None, last_review=review)
-    audit("task_completed", task_id=args.task_id, run_id=args.run_id, checkpoint=commit_result, actor=args.by)
-    print(json.dumps({"task": args.task_id, "status": "completed", "checkpoint": commit_result}, ensure_ascii=False, indent=2))
+    audit("task_completed", task_id=args.task_id, run_id=args.run_id, actor=args.by)
+    relay = finalize_review(args.task_id, str(entry["branch"]), args.decision, [str(path.relative_to(ROOT)).replace("\\", "/"), ".ai/project_state.json", ".ai/audit.jsonl"], args.rationale)
+    print(json.dumps({"task": args.task_id, "status": "completed", "github": relay}, ensure_ascii=False, indent=2))
     return 0
 
 
