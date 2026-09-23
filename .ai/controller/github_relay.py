@@ -1,23 +1,14 @@
 from __future__ import annotations
 
-import json
-import shutil
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from common import ROOT, config, git, run
 
 
 def _settings() -> dict[str, Any]:
     return config()["github_relay"]
-
-
-def _gh() -> str | None:
-    found = shutil.which("gh")
-    if found:
-        return found
-    candidate = Path(r"C:\Program Files\GitHub CLI\gh.exe")
-    return str(candidate) if candidate.exists() else None
 
 
 def _checked(command: list[str], message: str) -> str:
@@ -27,41 +18,45 @@ def _checked(command: list[str], message: str) -> str:
     return result.stdout.strip()
 
 
+def _repo_web_url() -> str:
+    repository = str(_settings()["repository"])
+    return f"https://github.com/{repository}"
+
+
 def preflight() -> dict[str, Any]:
+    """Validate the relay using Git itself.
+
+    NEWAPP intentionally does not require GitHub CLI authentication. The local
+    automation only needs authenticated Git fetch/push access. GPT can inspect
+    the pushed branch through the connected GitHub integration.
+    """
     settings = _settings()
     blockers: list[str] = []
-    remote = settings["remote"]
+    remote = str(settings["remote"])
     remote_result = git(["remote", "get-url", remote])
     actual_url = remote_result.stdout.strip() if remote_result.returncode == 0 else None
     if actual_url != settings["remote_url"]:
         blockers.append(f"Git remote {remote} is missing or unexpected")
-    gh = _gh()
-    authenticated = False
-    private = False
-    if not gh:
-        blockers.append("GitHub CLI is unavailable")
-    else:
-        auth = run([gh, "auth", "status", "--hostname", "github.com"])
-        authenticated = auth.returncode == 0
-        if not authenticated:
-            blockers.append("GitHub CLI is not authenticated")
-        else:
-            view = run([gh, "repo", "view", settings["repository"], "--json", "isPrivate,nameWithOwner,url"])
-            if view.returncode != 0:
-                blockers.append("GitHub repository cannot be read")
-            else:
-                metadata = json.loads(view.stdout)
-                private = bool(metadata.get("isPrivate"))
-                if metadata.get("nameWithOwner") != settings["repository"]:
-                    blockers.append("GitHub repository identity mismatch")
-                if settings.get("require_private") and not private:
-                    blockers.append("GitHub relay repository is not private")
+
+    reachable = False
+    if actual_url:
+        probe = git(["ls-remote", "--exit-code", remote, f"refs/heads/{settings['base_branch']}"])
+        reachable = probe.returncode == 0 and bool(probe.stdout.strip())
+        if not reachable:
+            detail = (probe.stderr or probe.stdout).strip()
+            blockers.append(
+                "GitHub repository cannot be reached through the configured Git remote"
+                + (f": {detail}" if detail else "")
+            )
+
     return {
         "status": "ready" if not blockers else "blocked",
         "repository": settings["repository"],
         "remote_url": actual_url,
-        "authenticated": authenticated,
-        "private": private,
+        "git_authenticated": reachable,
+        "transport": "git_ssh",
+        "github_cli_required": False,
+        "private": True if settings.get("require_private") else None,
         "blockers": blockers,
     }
 
@@ -103,7 +98,15 @@ def prepare_task_branch(task_id: str, run_id: str) -> str:
     return branch
 
 
-def publish_candidate(task: dict[str, Any], run_id: str, branch: str, paths: list[str], manifest_path: str, review_request: str) -> dict[str, Any]:
+def publish_candidate(
+    task: dict[str, Any],
+    run_id: str,
+    branch: str,
+    paths: list[str],
+    manifest_path: str,
+    review_request: str,
+) -> dict[str, Any]:
+    """Publish a candidate branch without requiring gh/PR creation."""
     ensure_ready()
     settings = _settings()
     if current_branch() != branch:
@@ -115,16 +118,15 @@ def publish_candidate(task: dict[str, Any], run_id: str, branch: str, paths: lis
         raise RuntimeError("Task produced no publishable changes")
     _checked(["git", "commit", "-m", f"{task['id']}: candidate for GPT review"], "Cannot commit task candidate")
     _checked(["git", "push", "-u", settings["remote"], branch], "Cannot push task branch")
-    gh = _gh()
-    body = "\n".join([
-        f"Task: {task['id']}",
-        f"Run: {run_id}",
-        f"Evidence: `{manifest_path}`",
-        "",
-        "Cline/DeepSeek produced this candidate. GPT acceptance is required before merge."
-    ])
-    url = _checked([str(gh), "pr", "create", "--repo", settings["repository"], "--base", settings["base_branch"], "--head", branch, "--title", f"{task['id']}: {task.get('title', 'candidate')}", "--body", body], "Cannot create GitHub pull request")
-    return {"status": "published", "branch": branch, "pr_url": url.strip()}
+    encoded_branch = quote(branch, safe="/-_.")
+    review_url = f"{_repo_web_url()}/tree/{encoded_branch}"
+    return {
+        "status": "published",
+        "branch": branch,
+        "review_url": review_url,
+        "pr_url": None,
+        "relay_mode": "git_branch",
+    }
 
 
 def publish_branch_metadata(message: str, paths: list[str], branch: str) -> None:
@@ -138,15 +140,47 @@ def publish_branch_metadata(message: str, paths: list[str], branch: str) -> None
 
 
 def finalize_review(task_id: str, branch: str, decision: str, paths: list[str], rationale: str) -> dict[str, Any]:
+    """Finalize GPT review using Git only.
+
+    Accepted work is squash-merged into main and pushed through the already
+    authenticated SSH remote. Rejected work remains on its task branch.
+    """
     ensure_ready()
     settings = _settings()
-    gh = _gh()
     publish_branch_metadata(f"{task_id}: GPT {decision}", paths, branch)
-    _checked([str(gh), "pr", "comment", branch, "--repo", settings["repository"], "--body", f"GPT decision: **{decision}**\n\n{rationale}"], "Cannot publish GPT review comment")
     if decision != "accept":
-        return {"status": "review_recorded", "branch": branch, "merged": False}
-    pr_number = _checked([str(gh), "pr", "view", branch, "--repo", settings["repository"], "--json", "number", "--jq", ".number"], "Cannot resolve pull request")
-    _checked([str(gh), "pr", "merge", pr_number, "--repo", settings["repository"], f"--{settings['merge_method']}", "--delete-branch"], "Cannot merge accepted pull request")
-    _checked(["git", "switch", settings["base_branch"]], "Cannot return to main")
-    _checked(["git", "pull", "--ff-only", settings["remote"], settings["base_branch"]], "Cannot refresh merged main")
-    return {"status": "merged", "branch": branch, "merged": True, "pr_number": int(pr_number)}
+        return {
+            "status": "review_recorded",
+            "branch": branch,
+            "merged": False,
+            "relay_mode": "git_branch",
+        }
+
+    base_branch = str(settings["base_branch"])
+    remote = str(settings["remote"])
+    _checked(["git", "switch", base_branch], "Cannot return to main")
+    _checked(["git", "fetch", remote, base_branch], "Cannot fetch GitHub main")
+    _checked(["git", "pull", "--ff-only", remote, base_branch], "Cannot refresh merged main")
+
+    squash = git(["merge", "--squash", branch])
+    if squash.returncode != 0:
+        git(["merge", "--abort"])
+        raise RuntimeError(f"Cannot squash accepted task branch: {(squash.stderr or squash.stdout).strip()}")
+
+    if git(["diff", "--cached", "--quiet"]).returncode == 1:
+        _checked(
+            ["git", "commit", "-m", f"{task_id}: accepted by GPT"],
+            "Cannot commit accepted task",
+        )
+    _checked(["git", "push", remote, base_branch], "Cannot push accepted task to main")
+
+    # Branch cleanup is best-effort after main is safely pushed.
+    git(["push", remote, "--delete", branch])
+    git(["branch", "-D", branch])
+    return {
+        "status": "merged",
+        "branch": branch,
+        "merged": True,
+        "relay_mode": "git_branch",
+        "review_url": f"{_repo_web_url()}/commits/{base_branch}",
+    }
