@@ -2,13 +2,13 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "ready",
+  "phase": "awaiting_codex_gpt_review",
   "paused": false,
   "pause_reason": null,
   "current_task": null,
   "last_completed_task": "NEWAPP-001",
-  "last_run_id": "20260923T104246927931Z-78cb8b29",
-  "blocker": null,
+  "last_run_id": "20260923T114120464620Z-cf32af53",
+  "blocker": "Codex desktop/mobile GPT final review required",
   "task_statuses": {
     "NEWAPP-001": {
       "status": "completed",
@@ -61,10 +61,29 @@
       }
     },
     "NEWAPP-002": {
-      "status": "retry",
-      "updated_at": "2026-09-23T11:10:02.152151Z",
+      "status": "awaiting_review",
+      "updated_at": "2026-09-23T11:49:05.142386Z",
       "request": ".ai/brain/requests/NEWAPP-002-plan-request.json",
-      "brain_decision": ".ai/brain/decisions/NEWAPP-002-plan.json"
+      "brain_decision": ".ai/brain/decisions/NEWAPP-002-plan.json",
+      "run_id": "20260923T114120464620Z-cf32af53",
+      "branch": "agent/newapp-002-cf32af53",
+      "attempts": 1,
+      "executor": {
+        "started_at": "2026-09-23T11:41:34.931614Z",
+        "finished_at": "2026-09-23T11:49:04.993983Z",
+        "exit_code": 0,
+        "log": ".ai/logs/20260923T114120464620Z-cf32af53-cline.jsonl"
+      },
+      "evidence_manifest": ".ai/evidence/NEWAPP-002/20260923T114120464620Z-cf32af53/manifest.json",
+      "changed_paths": [
+        ".ai/generated/NEWAPP-002-env-contract.json",
+        "docs/CONFIGURATION_CONTRACT.md",
+        "tests/__init__.py",
+        "tests/config/__init__.py",
+        "tests/config/env_contract.py",
+        "tests/config/test_env_contract.py"
+      ],
+      "review_request": ".ai/brain/requests/NEWAPP-002-20260923T114120464620Z-cf32af53-review-request.json"
     }
   },
   "last_validation": {
@@ -80,12 +99,12 @@
           "-q",
           ".ai/controller"
         ],
-        "started_at": "2026-09-23T11:03:52.378397Z",
-        "finished_at": "2026-09-23T11:03:52.441491Z",
+        "started_at": "2026-09-23T11:49:05.002580Z",
+        "finished_at": "2026-09-23T11:49:05.057402Z",
         "exit_code": 0
       }
     ],
-    "log": ".ai/logs/20260923T104246927931Z-78cb8b29-validation.log"
+    "log": ".ai/logs/20260923T114120464620Z-cf32af53-validation.log"
   },
   "last_review": {
     "task_id": "NEWAPP-001",
@@ -104,5 +123,5 @@
     "source": "codex_desktop_or_mobile_remote",
     "recorded_at": "2026-09-23T11:07:20.063051Z"
   },
-  "updated_at": "2026-09-23T11:10:02.155129Z"
+  "updated_at": "2026-09-23T11:49:05.145388Z"
 }

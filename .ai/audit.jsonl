@@ -19,3 +19,5 @@
 {"at": "2026-09-23T11:08:27.857370Z", "event": "preflight", "status": "ready", "blockers": [], "task_count": 68}
 {"at": "2026-09-23T11:08:52.549407Z", "event": "desktop_brain_plan_requested", "task_id": "NEWAPP-002", "request": ".ai/brain/requests/NEWAPP-002-plan-request.json"}
 {"at": "2026-09-23T11:10:02.158004Z", "event": "desktop_brain_plan_recorded", "task_id": "NEWAPP-002", "decision": "execute", "actor": "Codex GPT Desktop/Mobile Remote"}
+{"at": "2026-09-23T11:41:34.845906Z", "event": "brain_plan", "task_id": "NEWAPP-002", "run_id": "20260923T114120464620Z-cf32af53", "branch": "agent/newapp-002-cf32af53", "decision": "execute", "rationale": "Document the existing local configuration contract using key names and presence booleans only. Preserve .env byte-for-byte and produce a safe binding map for NEWAPP services without adding a second database, OSS bucket, or synchronization layer."}
+{"at": "2026-09-23T11:49:05.148424Z", "event": "desktop_brain_review_requested", "task_id": "NEWAPP-002", "run_id": "20260923T114120464620Z-cf32af53", "request": ".ai/brain/requests/NEWAPP-002-20260923T114120464620Z-cf32af53-review-request.json"}

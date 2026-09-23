@@ -1,0 +1,353 @@
+{
+  "task_id": "NEWAPP-002",
+  "task_title": "Inspect existing .env configuration contract safely",
+  "task_phase": "P0",
+  "artifact": "env_configuration_contract",
+  "generated_at": "2026-09-23T11:48:40.848175Z",
+  "generated_by": "newapp_executor (Cline/DeepSeek)",
+  "completion_authority": "GPT brain final review; this artifact is evidence only",
+  "executor_payload_received": false,
+  "payload_reconstruction": {
+    "controller_payload_section_present": false,
+    "sources": [
+      "docs/NEWAPP_TASKS_V1.yaml#NEWAPP-002",
+      ".ai/brain/decisions/NEWAPP-002-plan.json",
+      ".ai/agent_config.yaml#paths.executor_allowed"
+    ],
+    "note": "Task identity, GPT plan and allowed paths were read from the controller-owned records listed in sources. No queue, approval, branch or state file was written by the executor."
+  },
+  "controller": {
+    "available": true,
+    "phase": "executing",
+    "run_id": "20260923T114120464620Z-cf32af53",
+    "branch": "agent/newapp-002-cf32af53",
+    "task_status": "executing"
+  },
+  "git": {
+    "repository_present": true,
+    "head_commit": "1397a37884a596b224037ffa1899f48c56b27e58",
+    "branch": "agent/newapp-002-cf32af53"
+  },
+  "source_files": {
+    "environment_file_label": ".env",
+    "policy_path": ".ai/agent_config.yaml",
+    "policy_section": "environment.required_key_groups",
+    "policy_available": true
+  },
+  "environment_file": {
+    "path_label": ".env",
+    "exists_locally": true,
+    "ignored_by_git": true,
+    "tracked_by_git": false
+  },
+  "read_only_guard": {
+    "read_only_collection": true,
+    "file_unchanged_after_read": true,
+    "git_status_unchanged": true,
+    "values_recorded": false,
+    "values_hashed": false,
+    "assignment_lines_reproduced": false
+  },
+  "key_inventory": {
+    "key_count": 6,
+    "unique_key_count": 6,
+    "configured_key_count": 6,
+    "empty_value_key_count": 0,
+    "malformed_line_count": 0,
+    "comment_line_count": 6,
+    "blank_line_count": 4,
+    "key_names": [
+      "ERP_ConnectionStrings__Default",
+      "ERP_Jwt__Key",
+      "ERP_Oss__AccessKeyId",
+      "ERP_Oss__AccessKeySecret",
+      "ERP_Oss__Bucket",
+      "ERP_Oss__Endpoint"
+    ],
+    "duplicate_key_names": [],
+    "assignment_syntax": "single-line NAME with an optional export prefix, a separator and a value"
+  },
+  "groups": [
+    {
+      "id": "database",
+      "label": "Shared SQL Server database",
+      "consumer": "NEWAPP server API / worker only",
+      "from_policy": true,
+      "expected_names": [
+        "ERP_ConnectionStrings__Default"
+      ],
+      "present_names": [
+        "ERP_ConnectionStrings__Default"
+      ],
+      "configured_names": [
+        "ERP_ConnectionStrings__Default"
+      ],
+      "empty_value_names": [],
+      "missing_names": [],
+      "expected_count": 1,
+      "present_count": 1
+    },
+    {
+      "id": "oss",
+      "label": "Shared OSS object storage",
+      "consumer": "NEWAPP server API / worker only",
+      "from_policy": true,
+      "expected_names": [
+        "ERP_Oss__Endpoint",
+        "ERP_Oss__Bucket",
+        "ERP_Oss__AccessKeyId",
+        "ERP_Oss__AccessKeySecret"
+      ],
+      "present_names": [
+        "ERP_Oss__AccessKeyId",
+        "ERP_Oss__AccessKeySecret",
+        "ERP_Oss__Bucket",
+        "ERP_Oss__Endpoint"
+      ],
+      "configured_names": [
+        "ERP_Oss__AccessKeyId",
+        "ERP_Oss__AccessKeySecret",
+        "ERP_Oss__Bucket",
+        "ERP_Oss__Endpoint"
+      ],
+      "empty_value_names": [],
+      "missing_names": [],
+      "expected_count": 4,
+      "present_count": 4
+    },
+    {
+      "id": "auth",
+      "label": "Authentication and token signing",
+      "consumer": "NEWAPP server API / worker only",
+      "from_policy": true,
+      "expected_names": [
+        "ERP_Jwt__Key"
+      ],
+      "present_names": [
+        "ERP_Jwt__Key"
+      ],
+      "configured_names": [
+        "ERP_Jwt__Key"
+      ],
+      "empty_value_names": [],
+      "missing_names": [],
+      "expected_count": 1,
+      "present_count": 1
+    },
+    {
+      "id": "ai_provider",
+      "label": "AI provider",
+      "consumer": "NEWAPP server API / AI worker only",
+      "from_policy": false,
+      "expected_names": [],
+      "present_names": [],
+      "configured_names": [],
+      "empty_value_names": [],
+      "missing_names": [],
+      "expected_count": 0,
+      "present_count": 0
+    },
+    {
+      "id": "application",
+      "label": "Application settings (not credentials)",
+      "consumer": "NEWAPP server configuration",
+      "from_policy": false,
+      "expected_names": [],
+      "present_names": [],
+      "configured_names": [],
+      "empty_value_names": [],
+      "missing_names": [],
+      "expected_count": 0,
+      "present_count": 0
+    }
+  ],
+  "binding_map": [
+    {
+      "env_name": "ERP_ConnectionStrings__Default",
+      "group": "database",
+      "configuration_key": "ConnectionStrings:Default",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    },
+    {
+      "env_name": "ERP_Jwt__Key",
+      "group": "auth",
+      "configuration_key": "Jwt:Key",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    },
+    {
+      "env_name": "ERP_Oss__AccessKeyId",
+      "group": "oss",
+      "configuration_key": "Oss:AccessKeyId",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    },
+    {
+      "env_name": "ERP_Oss__AccessKeySecret",
+      "group": "oss",
+      "configuration_key": "Oss:AccessKeySecret",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    },
+    {
+      "env_name": "ERP_Oss__Bucket",
+      "group": "oss",
+      "configuration_key": "Oss:Bucket",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    },
+    {
+      "env_name": "ERP_Oss__Endpoint",
+      "group": "oss",
+      "configuration_key": "Oss:Endpoint",
+      "consumer": "NEWAPP server API / worker only",
+      "value_fields_recorded": false
+    }
+  ],
+  "unclassified_key_names": [],
+  "missing_key_names": [],
+  "empty_value_key_names": [],
+  "policy_group_ids_unknown_to_this_tool": [],
+  "binding_contract": {
+    "convention": "Observed ASP.NET Core environment-variable convention: the application prefix 'ERP_' is removed and the '__' hierarchy separator becomes ':'.",
+    "statements": [
+      "NEWAPP and NEWERP share one SQL Server database, one OSS and one master-data set; NEWAPP adds no second customer/supplier master-data store.",
+      "No NEWAPP/NEWERP synchronization service is introduced by this task or by the configuration contract.",
+      "Database and OSS access stays behind the NEWAPP server API/worker: no mobile client (Flutter or ArkTS) holds those names' values and no mobile client connects directly to SQL Server.",
+      "Existing key names are neither renamed nor overwritten by automation; where a name differs from a code default, a ConfigMapping layer is added instead of renaming a user secret."
+    ],
+    "shared_database_with_newerp": true,
+    "shared_oss_with_newerp": true,
+    "second_master_data_store_created": false,
+    "synchronization_service_added": false,
+    "mobile_client_holds_platform_values": false,
+    "mobile_client_direct_sql_server_connection": false,
+    "key_names_renamed_or_overwritten": false,
+    "sources": [
+      "docs/NEWAPP_TASKS_V1.yaml#relationship_to_newerp",
+      "docs/NEWAPP_TASKS_V1.yaml#environment.rules",
+      ".ai/agent_config.yaml#project.shares_database_and_oss_with",
+      ".ai/agent_config.yaml#human_gate.forbidden_even_with_approval"
+    ],
+    "note": "Fixed contract statements for the shared NEWERP/NEWAPP platform; this task changes no code, database, OSS or NEWERP resource."
+  },
+  "artifacts": {
+    "reports": [
+      ".ai/generated/NEWAPP-002-env-contract.json"
+    ],
+    "documents": [
+      "docs/CONFIGURATION_CONTRACT.md"
+    ],
+    "executor_paths": [
+      ".ai/generated/NEWAPP-002-env-contract.json",
+      "docs/CONFIGURATION_CONTRACT.md",
+      "tests/__init__.py",
+      "tests/config/__init__.py",
+      "tests/config/env_contract.py",
+      "tests/config/test_env_contract.py"
+    ]
+  },
+  "path_guard_compatibility": {
+    "allowed_patterns_source": ".ai/agent_config.yaml#paths.executor_allowed",
+    "normalization": "common.path_matches applies path.replace('\\\\','/') and removes only exact leading './' prefixes before fnmatch, so dot-directory patterns are preserved",
+    "paths": [
+      {
+        "path": ".ai/generated/NEWAPP-002-env-contract.json",
+        "normalized_for_guard": ".ai/generated/newapp-002-env-contract.json",
+        "accepted": true,
+        "matched_patterns": [
+          ".ai/generated/**"
+        ]
+      },
+      {
+        "path": "docs/CONFIGURATION_CONTRACT.md",
+        "normalized_for_guard": "docs/configuration_contract.md",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**",
+          "*.md"
+        ]
+      },
+      {
+        "path": "tests/__init__.py",
+        "normalized_for_guard": "tests/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/config/__init__.py",
+        "normalized_for_guard": "tests/config/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/config/env_contract.py",
+        "normalized_for_guard": "tests/config/env_contract.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/config/test_env_contract.py",
+        "normalized_for_guard": "tests/config/test_env_contract.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      }
+    ],
+    "all_paths_accepted": true
+  },
+  "acceptance_evidence": [
+    {
+      "criterion": "Evidence contains key names only, with all values redacted.",
+      "evidence": "self-check of the rendered JSON report and markdown document against the repository secret rules",
+      "satisfied": true
+    },
+    {
+      "criterion": "No existing .env key is renamed or overwritten.",
+      "evidence": "the environment file was opened read-only; Git status and file metadata stayed unchanged",
+      "satisfied": true
+    },
+    {
+      "criterion": ".env remains present locally and untracked.",
+      "evidence": "git check-ignore and git ls-files --error-unmatch evaluated on the path label only",
+      "satisfied": true
+    },
+    {
+      "criterion": "Every parsed key name is grouped or listed by name only.",
+      "evidence": "groups, unclassified_key_names and the malformed-line count of the environment file",
+      "satisfied": true
+    }
+  ],
+  "value_free_check": {
+    "status": "passed",
+    "rules": [
+      "key_name_assignment",
+      "keyword_assignment"
+    ],
+    "violations_count": 0,
+    "violations": []
+  },
+  "reproduce": {
+    "env_contract": "python tests/config/env_contract.py --write",
+    "unit_tests": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "secret_scan": "python tests/baseline/secret_scan.py --json"
+  },
+  "limitations": [
+    "Only key names, group ids, booleans and counts are recorded; a value is read in memory solely to decide between configured and empty and is then discarded.",
+    "No value, quote, prefix, suffix, length or hash of a value is recorded, printed, logged, stored in an exception message or compared.",
+    "The contract describes the local environment file observed at generation time; a name added later appears only after the next run.",
+    "A name that matches no group rule is listed by name only and is not renamed, reclassified or written back automatically.",
+    "This document and the JSON report are evidence only; GPT review decides completion."
+  ],
+  "unresolved_issues": [],
+  "secret_values_included": false,
+  "status": "evidence_collected"
+}

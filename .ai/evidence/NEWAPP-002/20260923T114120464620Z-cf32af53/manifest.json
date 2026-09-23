@@ -1,0 +1,67 @@
+{
+  "task_id": "NEWAPP-002",
+  "run_id": "20260923T114120464620Z-cf32af53",
+  "created_at": "2026-09-23T11:49:05.136570Z",
+  "status": "ready_for_gpt_review",
+  "executor": {
+    "started_at": "2026-09-23T11:41:34.931614Z",
+    "finished_at": "2026-09-23T11:49:04.993983Z",
+    "exit_code": 0,
+    "log": ".ai/logs/20260923T114120464620Z-cf32af53-cline.jsonl"
+  },
+  "validation": {
+    "status": "passed",
+    "exit_code": 0,
+    "profile": "safe",
+    "steps": [
+      {
+        "command": [
+          "D:\\VSCodeProject\\NEWAPP\\.venv\\Scripts\\python.exe",
+          "-m",
+          "compileall",
+          "-q",
+          ".ai/controller"
+        ],
+        "started_at": "2026-09-23T11:49:05.002580Z",
+        "finished_at": "2026-09-23T11:49:05.057402Z",
+        "exit_code": 0
+      }
+    ],
+    "log": ".ai/logs/20260923T114120464620Z-cf32af53-validation.log"
+  },
+  "path_guard": {
+    "status": "passed",
+    "changed_paths": [
+      ".ai/generated/NEWAPP-002-env-contract.json",
+      "docs/CONFIGURATION_CONTRACT.md",
+      "tests/__init__.py",
+      "tests/config/__init__.py",
+      "tests/config/env_contract.py",
+      "tests/config/test_env_contract.py"
+    ],
+    "protected_paths": [],
+    "outside_allowed_paths": []
+  },
+  "browser_acceptance": {
+    "status": "not_required",
+    "real_browser": false,
+    "screenshots": 0
+  },
+  "screenshots": {
+    "required": false,
+    "count": 0
+  },
+  "artifacts": [
+    {
+      "path": ".ai/logs/20260923T114120464620Z-cf32af53-cline.jsonl",
+      "sha256": "97623ad2f641f8d72f03c986fd5e6e65f7458b3fc1c17ed790ef984ab32fdf46",
+      "bytes": 7938041
+    },
+    {
+      "path": ".ai/logs/20260923T114120464620Z-cf32af53-validation.log",
+      "sha256": "ba413402bd8c84962590168db18b3ce762b21feea3d6cc688e5829a4c1c30f61",
+      "bytes": 83
+    }
+  ],
+  "note": "Cline success is code_ready only; GPT final review is still required."
+}
