@@ -47,6 +47,8 @@ Register `D:\VSCodeProject\NEWAPP` as a local Codex project on the Windows host.
 
 ## GitHub relay
 
-The private repository `liq87917-boop/NEWAPP` is the cross-device relay. GPT plan decisions are committed to `main`. Each DeepSeek/Cline attempt runs on an `agent/NEWAPP-*` branch and is published as a Pull Request with a redacted evidence manifest. The PR is never merged merely because Cline exits successfully. Codex GPT on desktop or mobile Remote records the final decision; only `accept` triggers a squash merge. Rejections stay on the PR with the reason and required fixes.
+The private repository `liq87917-boop/NEWAPP` is the cross-device relay. GPT plan decisions are committed to `main`. Each DeepSeek/Cline attempt runs on an `agent/NEWAPP-*` branch and is pushed through the authenticated SSH Git remote together with a redacted evidence manifest and review request. Local automation does **not** require GitHub CLI (`gh`) authentication and does not require a Pull Request to exist. Codex GPT on desktop/mobile or through the connected GitHub integration reviews the task branch and records the final decision. Only `accept` triggers a local Git squash merge into `main` followed by an SSH push; rejection leaves the candidate branch intact for diagnosis or rework.
+
+This mirrors the XAUUSD control pattern more closely: Git transport is the hard dependency, while GitHub CLI/UI features are optional rather than control-plane blockers.
 
 Human approvals are local runtime records under `.ai/decisions/` and are ignored by Git by default. Approval never permits `DROP`, `TRUNCATE`, production deployment, production DML, or use of production data in tests.
