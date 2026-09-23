@@ -4,14 +4,21 @@ cd /d "%~dp0"
 chcp 65001 >nul
 title NEWAPP AI Control Plane
 
-if "%~1"=="" (
-  py -3 ".ai\controller\agent_loop.py" preflight
+if exist "%~dp0.venv\Scripts\python.exe" (
+  if "%~1"=="" (
+    "%~dp0.venv\Scripts\python.exe" ".ai\controller\agent_loop.py" preflight
+  ) else (
+    "%~dp0.venv\Scripts\python.exe" ".ai\controller\agent_loop.py" %*
+  )
 ) else (
-  py -3 ".ai\controller\agent_loop.py" %*
+  if "%~1"=="" (
+    py -3 ".ai\controller\agent_loop.py" preflight
+  ) else (
+    py -3 ".ai\controller\agent_loop.py" %*
+  )
 )
 
 set "EXITCODE=%ERRORLEVEL%"
 echo.
 echo NEWAPP control plane exited with code %EXITCODE%.
 exit /b %EXITCODE%
-

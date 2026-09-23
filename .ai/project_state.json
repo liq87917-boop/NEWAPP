@@ -2,16 +2,15 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "preflight",
+  "phase": "preflight_blocked",
   "paused": false,
   "pause_reason": null,
   "current_task": null,
   "last_completed_task": null,
   "last_run_id": null,
-  "blocker": null,
+  "blocker": "GPT brain configuration missing: OPENAI_API_KEY",
   "task_statuses": {},
   "last_validation": null,
   "last_review": null,
-  "updated_at": null
+  "updated_at": "2026-09-23T08:40:45.820909Z"
 }
-
