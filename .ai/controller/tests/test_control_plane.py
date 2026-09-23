@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import sys
 import unittest
 from pathlib import Path
@@ -10,6 +11,7 @@ if str(CONTROLLER) not in sys.path:
 
 from task_loader import QueueResult, load_tasks, queue_head, requires_human_gate
 from common import config, path_matches
+from agent_loop import preflight
 
 
 class ControlPlaneContractTests(unittest.TestCase):
@@ -49,6 +51,10 @@ class ControlPlaneContractTests(unittest.TestCase):
 
     def test_executor_is_explicitly_pinned_to_deepseek(self) -> None:
         self.assertEqual("deepseek", config()["runtime"]["cline_provider"])
+
+    def test_preflight_is_read_only_by_default(self) -> None:
+        signature = inspect.signature(preflight)
+        self.assertFalse(signature.parameters["write_state"].default)
 
     def test_hidden_control_artifact_matches_allowed_path(self) -> None:
         self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
