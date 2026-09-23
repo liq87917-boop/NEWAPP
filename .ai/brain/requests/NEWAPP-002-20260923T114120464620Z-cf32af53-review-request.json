@@ -34,5 +34,9 @@
     "criteria_results": [],
     "required_fixes": []
   },
-  "record_command": "start_agent.bat record-review NEWAPP-002 20260923T114120464620Z-cf32af53 --decision accept --rationale <text>"
+  "record_command": "start_agent.bat record-review NEWAPP-002 20260923T114120464620Z-cf32af53 --decision accept --rationale <text>",
+  "github_pr": null,
+  "github_branch": "agent/newapp-002-cf32af53",
+  "github_review_url": "https://github.com/liq87917-boop/NEWAPP/tree/agent/newapp-002-cf32af53",
+  "github_relay_mode": "git_branch"
 }
