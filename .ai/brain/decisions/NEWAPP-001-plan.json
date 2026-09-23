@@ -1,0 +1,19 @@
+{
+  "task_id": "NEWAPP-001",
+  "decision": "execute",
+  "rationale": "Establish and verify the repository safety baseline before any business work. The executor must not read, print, copy, or modify secret values and must make no database, OSS, signing, release, or production changes. Produce a machine-readable baseline report under .ai/generated containing only booleans, counts, and policy/path results so the task has auditable output.",
+  "validation_focus": [
+    ".env exists locally and is ignored and untracked; never display its contents or values.",
+    "Tracked files and full Git history contain no tracked .env, agent.env, certificate, private-key, keystore, or common credential material; report only counts and file names, never matched secret text.",
+    "GPT remains the sole planning and final acceptance authority; Cline/DeepSeek may not mark the task complete.",
+    "Create .ai/generated/NEWAPP-001-baseline-report.json with non-secret boolean/count evidence.",
+    "No business implementation, database or OSS mutation, signing, deployment, release, DROP, TRUNCATE, or production action."
+  ],
+  "risks": [
+    "Secret scanning can accidentally echo matched credentials; suppress matched content and record only safe metadata.",
+    "Do not reinitialize Git, rewrite history, alter remotes, or modify protected control-plane files."
+  ],
+  "actor": "Codex GPT Desktop/Mobile Remote",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T10:38:53.564534Z"
+}

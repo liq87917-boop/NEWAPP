@@ -2,23 +2,24 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "awaiting_codex_gpt",
+  "phase": "ready",
   "paused": false,
   "pause_reason": null,
-  "current_task": "NEWAPP-001",
+  "current_task": null,
   "last_completed_task": null,
   "last_run_id": null,
-  "blocker": "Codex desktop/mobile GPT plan decision required",
+  "blocker": null,
   "task_statuses": {
     "NEWAPP-001": {
-      "status": "awaiting_brain",
-      "updated_at": "2026-09-23T10:36:24.532109Z",
+      "status": "retry",
+      "updated_at": "2026-09-23T10:38:53.645237Z",
       "reason": "matched risk terms: signing",
       "approval": ".ai/decisions/NEWAPP-001-approved.json",
-      "request": ".ai/brain/requests/NEWAPP-001-plan-request.json"
+      "request": ".ai/brain/requests/NEWAPP-001-plan-request.json",
+      "brain_decision": ".ai/brain/decisions/NEWAPP-001-plan.json"
     }
   },
   "last_validation": null,
   "last_review": null,
-  "updated_at": "2026-09-23T10:36:24.537098Z"
+  "updated_at": "2026-09-23T10:38:53.648726Z"
 }

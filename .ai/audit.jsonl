@@ -8,3 +8,4 @@
 {"at": "2026-09-23T10:33:15.996898Z", "event": "human_gate_required", "task_id": "NEWAPP-001", "reason": "matched risk terms: signing"}
 {"at": "2026-09-23T10:36:04.609052Z", "event": "human_gate_approved", "task_id": "NEWAPP-001", "approved_by": "User via Codex conversation", "reason": "User explicitly authorized starting development; approval limited to repository baseline and secret rules, excluding signing, release, database and production operations"}
 {"at": "2026-09-23T10:36:24.540038Z", "event": "desktop_brain_plan_requested", "task_id": "NEWAPP-001", "request": ".ai/brain/requests/NEWAPP-001-plan-request.json"}
+{"at": "2026-09-23T10:38:53.651702Z", "event": "desktop_brain_plan_recorded", "task_id": "NEWAPP-001", "decision": "execute", "actor": "Codex GPT Desktop/Mobile Remote"}
