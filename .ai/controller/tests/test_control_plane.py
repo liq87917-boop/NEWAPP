@@ -56,6 +56,12 @@ class ControlPlaneContractTests(unittest.TestCase):
         signature = inspect.signature(preflight)
         self.assertFalse(signature.parameters["write_state"].default)
 
+    def test_newapp_002_has_focused_validation_commands(self) -> None:
+        commands = config()["validation"]["task_commands"]["NEWAPP-002"]
+        flattened = [" ".join(command) for command in commands]
+        self.assertTrue(any("unittest discover -s tests/config" in command for command in flattened))
+        self.assertTrue(any("tests/baseline/secret_scan.py --json" in command for command in flattened))
+
     def test_hidden_control_artifact_matches_allowed_path(self) -> None:
         self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
         self.assertTrue(path_matches("./.ai/generated/evidence.json", [".ai/generated/**"]))
