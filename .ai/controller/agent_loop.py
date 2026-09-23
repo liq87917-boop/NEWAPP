@@ -117,7 +117,31 @@ def status_command() -> int:
     tasks = load_tasks()
     head = queue_head(tasks, project_state)
     rows = [{"id": task["id"], "status": effective_status(task["id"], project_state), "title": task.get("title")} for task in tasks]
-    print(json.dumps({"project_state": project_state, "queue_head": head.task["id"] if head.task else None, "queue_reason": head.reason, "tasks": rows}, ensure_ascii=False, indent=2))
+    decisions_dir = ROOT / config()["brain"]["decisions_dir"]
+    planned = [
+        task["id"]
+        for task in tasks
+        if (decisions_dir / f"{task['id']}-plan.json").exists()
+        and effective_status(task["id"], project_state) not in {"completed", "deferred", "skipped"}
+    ]
+    pending_review = [
+        task["id"] for task in tasks if effective_status(task["id"], project_state) == "awaiting_review"
+    ]
+    rolling = config().get("rolling_queue", {})
+    print(json.dumps({
+        "project_state": project_state,
+        "queue_head": head.task["id"] if head.task else None,
+        "queue_reason": head.reason,
+        "rolling_queue": {
+            "enabled": bool(rolling.get("enabled", False)),
+            "target_size": int(rolling.get("target_size", 0)),
+            "planned_tasks": planned,
+            "pending_reviews": pending_review,
+            "idle_poll_seconds": int(rolling.get("idle_poll_seconds", 0)),
+            "review_interval_minutes": int(rolling.get("review_interval_minutes", 0)),
+        },
+        "tasks": rows,
+    }, ensure_ascii=False, indent=2))
     return 0
 
 
