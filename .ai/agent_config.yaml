@@ -23,7 +23,7 @@
     "auto_push": false
   },
   "brain": {
-    "mode": "codex_desktop_file_bridge",
+    "mode": "codex_remote_file_bridge",
     "requests_dir": ".ai/brain/requests",
     "decisions_dir": ".ai/brain/decisions",
     "api_key_required": false

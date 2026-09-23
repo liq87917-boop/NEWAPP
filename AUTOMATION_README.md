@@ -1,6 +1,6 @@
 # NEWAPP automation control plane
 
-This control plane keeps GPT in the Codex desktop app as the planning and final-acceptance authority while Cline/DeepSeek is limited to implementing one approved task at a time. It does not call the OpenAI API and does not require `OPENAI_API_KEY`.
+This control plane keeps GPT in Codex desktop or ChatGPT mobile Remote as the planning and final-acceptance authority while Cline/DeepSeek is limited to implementing one approved task at a time. It does not call the OpenAI API and does not require `OPENAI_API_KEY`.
 
 ## Safety model
 
@@ -39,6 +39,10 @@ start_agent.bat resume
 start_agent.bat retry NEWAPP-001 --by "Name" --reason "Runtime issue corrected"
 ```
 
-Running `start_agent.bat` with no arguments performs a safe preflight only. It does not start a business task. `plan` writes a request under `.ai/brain/requests/` and pauses. Codex desktop GPT reads that request and records a decision. `run-once` then lets DeepSeek/Cline execute at most one approved task, validates it, writes the evidence review request, and pauses again for desktop GPT final acceptance. The queue never advances while either desktop decision is missing.
+Running `start_agent.bat` with no arguments performs a safe preflight only. It does not start a business task. `plan` writes a request under `.ai/brain/requests/` and pauses. Codex GPT on desktop or mobile Remote reads that request and records a decision. `run-once` then lets DeepSeek/Cline execute at most one approved task, validates it, writes the evidence review request, and pauses again for Codex GPT final acceptance. The queue never advances while either Codex decision is missing.
+
+## Mobile Remote
+
+Register `D:\VSCodeProject\NEWAPP` as a local Codex project on the Windows host. In the ChatGPT mobile app, open Remote, choose that connected Windows host and the NEWAPP workspace, then open or start the NEWAPP control task. The phone supplies planning, steering, approvals, and final review; Cline/DeepSeek and all builds/tests continue to run on the Windows host. Keep the host online and signed in. Desktop and mobile use the same `.ai/brain/requests/` and `.ai/brain/decisions/` handshake.
 
 Human approvals are local runtime records under `.ai/decisions/` and are ignored by Git by default. Approval never permits `DROP`, `TRUNCATE`, production deployment, production DML, or use of production data in tests.

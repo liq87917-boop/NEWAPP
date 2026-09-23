@@ -44,7 +44,7 @@ class ControlPlaneContractTests(unittest.TestCase):
 
     def test_brain_uses_desktop_bridge_without_api_key(self) -> None:
         settings = config()["brain"]
-        self.assertEqual("codex_desktop_file_bridge", settings["mode"])
+        self.assertEqual("codex_remote_file_bridge", settings["mode"])
         self.assertFalse(settings["api_key_required"])
 
 

@@ -152,9 +152,9 @@ def run_one(*, plan_only: bool = False) -> int:
             request_path = request_plan(task)
             relative_request = str(request_path.relative_to(ROOT)).replace("\\", "/")
             set_task_status(project_state, task["id"], "awaiting_brain", request=relative_request)
-            save_state(project_state, phase="awaiting_desktop_gpt", current_task=task["id"], blocker="Desktop GPT plan decision required")
+            save_state(project_state, phase="awaiting_codex_gpt", current_task=task["id"], blocker="Codex desktop/mobile GPT plan decision required")
             audit("desktop_brain_plan_requested", task_id=task["id"], request=relative_request)
-            print(json.dumps({"status": "awaiting_desktop_gpt", "task_id": task["id"], "request": relative_request}, ensure_ascii=False, indent=2))
+            print(json.dumps({"status": "awaiting_codex_gpt", "task_id": task["id"], "request": relative_request}, ensure_ascii=False, indent=2))
             return 16
         audit("brain_plan", task_id=task["id"], decision=decision["decision"], rationale=decision["rationale"])
         if decision["decision"] != "execute":
@@ -211,9 +211,9 @@ def run_one(*, plan_only: bool = False) -> int:
         review_request = request_review(task, run_id, manifest["manifest_path"])
         relative_request = str(review_request.relative_to(ROOT)).replace("\\", "/")
         set_task_status(project_state, task["id"], "awaiting_review", run_id=run_id, evidence_manifest=manifest["manifest_path"], changed_paths=manifest["path_guard"]["changed_paths"], review_request=relative_request)
-        save_state(project_state, phase="awaiting_desktop_gpt_review", last_validation=validation, blocker="Desktop GPT final review required")
+        save_state(project_state, phase="awaiting_codex_gpt_review", last_validation=validation, blocker="Codex desktop/mobile GPT final review required")
         audit("desktop_brain_review_requested", task_id=task["id"], run_id=run_id, request=relative_request)
-        print(json.dumps({"status": "awaiting_desktop_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request}, ensure_ascii=False, indent=2))
+        print(json.dumps({"status": "awaiting_codex_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request}, ensure_ascii=False, indent=2))
         return 17
 
 
@@ -306,9 +306,9 @@ def main() -> int:
     retry_parser = sub.add_parser("retry")
     retry_parser.add_argument("task_id"); retry_parser.add_argument("--by", required=True); retry_parser.add_argument("--reason", required=True)
     plan_parser = sub.add_parser("record-plan")
-    plan_parser.add_argument("task_id"); plan_parser.add_argument("--decision", choices=["execute", "human_gate", "block"], required=True); plan_parser.add_argument("--rationale", required=True); plan_parser.add_argument("--validation-focus", action="append", default=[]); plan_parser.add_argument("--risk", action="append", default=[]); plan_parser.add_argument("--by", default="Codex Desktop GPT")
+    plan_parser.add_argument("task_id"); plan_parser.add_argument("--decision", choices=["execute", "human_gate", "block"], required=True); plan_parser.add_argument("--rationale", required=True); plan_parser.add_argument("--validation-focus", action="append", default=[]); plan_parser.add_argument("--risk", action="append", default=[]); plan_parser.add_argument("--by", default="Codex GPT Desktop/Mobile Remote")
     review_parser = sub.add_parser("record-review")
-    review_parser.add_argument("task_id"); review_parser.add_argument("run_id"); review_parser.add_argument("--decision", choices=["accept", "reject", "human_gate"], required=True); review_parser.add_argument("--rationale", required=True); review_parser.add_argument("--criterion", action="append", default=[]); review_parser.add_argument("--required-fix", action="append", default=[]); review_parser.add_argument("--by", default="Codex Desktop GPT")
+    review_parser.add_argument("task_id"); review_parser.add_argument("run_id"); review_parser.add_argument("--decision", choices=["accept", "reject", "human_gate"], required=True); review_parser.add_argument("--rationale", required=True); review_parser.add_argument("--criterion", action="append", default=[]); review_parser.add_argument("--required-fix", action="append", default=[]); review_parser.add_argument("--by", default="Codex GPT Desktop/Mobile Remote")
     args = parser.parse_args()
     command = args.command or config()["runtime"]["default_command"]
     if command == "preflight": return preflight()

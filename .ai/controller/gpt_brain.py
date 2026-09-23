@@ -67,7 +67,7 @@ def record_plan(task_id: str, decision: str, rationale: str, validation_focus: l
         "validation_focus": validation_focus,
         "risks": risks,
         "actor": actor,
-        "source": "codex_desktop",
+        "source": "codex_desktop_or_mobile_remote",
         "recorded_at": utc_now()
     })
     return path
@@ -109,8 +109,7 @@ def record_review(task_id: str, run_id: str, decision: str, rationale: str, crit
         "criteria_results": criteria_results,
         "required_fixes": required_fixes,
         "actor": actor,
-        "source": "codex_desktop",
+        "source": "codex_desktop_or_mobile_remote",
         "recorded_at": utc_now()
     })
     return path
-
