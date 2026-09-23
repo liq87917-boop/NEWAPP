@@ -1,0 +1,21 @@
+{
+  "task_id": "NEWAPP-002",
+  "run_id": "20260923T114120464620Z-cf32af53",
+  "decision": "reject",
+  "rationale": "GPT review found the implementation and value-free configuration contract consistent with NEWAPP-002, but the evidence package does not independently prove that the focused configuration tests ran successfully. The manifest only records controller compileall validation, GitHub Actions has no run for this branch, and the referenced local Cline log was not published to the review branch. NEWAPP-002 must be rerun after the control plane adds focused unit-test and secret-scan validation so the manifest contains executable test evidence.",
+  "criteria_results": [
+    "PASS: The generated contract contains environment key names and state/count metadata only; no observed .env values are stored in the report or Markdown.",
+    "PASS: The implementation reads .env read-only and reports that the file and Git status remained unchanged.",
+    "PASS: Path guard passed and executor changes stayed within approved generated/docs/tests paths.",
+    "PASS: Static inspection confirms parsed values are reduced to presence/empty booleans before facts leave parse_env_text.",
+    "INSUFFICIENT EVIDENCE: tests/config/test_env_contract.py and the secret scan are present but no independent execution result is recorded in the published evidence manifest."
+  ],
+  "required_fixes": [
+    "Run python -m unittest discover -s tests/config -p test_*.py during controller validation and record its exit code in the evidence manifest.",
+    "Run python tests/baseline/secret_scan.py --json during controller validation and record its exit code in the evidence manifest.",
+    "Regenerate NEWAPP-002 evidence and request GPT review again."
+  ],
+  "actor": "Codex GPT Desktop/Mobile Remote",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T11:55:00Z"
+}
