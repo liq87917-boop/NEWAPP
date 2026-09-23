@@ -66,7 +66,7 @@ def approval(task_id: str) -> dict[str, Any] | None:
     return value if value.get("task_id") == task_id and value.get("decision") == "approved" else None
 
 
-def preflight(write_state: bool = True) -> int:
+def preflight(write_state: bool = False) -> int:
     cfg = config()
     tasks = load_tasks()
     env = read_env(ROOT / cfg["environment"]["file"])
