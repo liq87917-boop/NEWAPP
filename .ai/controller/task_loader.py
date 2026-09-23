@@ -9,6 +9,8 @@ from common import ROOT, config
 
 TERMINAL = {"completed", "deferred", "skipped"}
 RUNNABLE = {"queued", "retry"}
+ACTIVE_BLOCKING = {"executing", "code_ready", "validating"}
+NONBLOCKING_WAIT = {"awaiting_brain", "awaiting_human", "awaiting_review", "blocked", "failed"}
 
 
 @dataclass(frozen=True)
@@ -121,19 +123,50 @@ def effective_status(task_id: str, project_state: dict[str, Any]) -> str:
 
 
 def queue_head(tasks: list[dict[str, Any]], project_state: dict[str, Any]) -> QueueResult:
+    """Select the next dependency-safe task without letting review wait states stall unrelated work."""
     by_id = {task["id"]: task for task in tasks}
+
+    # An active local execution is exclusive. If one remains in persisted state,
+    # it must be recovered rather than silently starting a second executor.
+    for task in tasks:
+        status = effective_status(task["id"], project_state)
+        if status in ACTIVE_BLOCKING:
+            return QueueResult(None, f"{task['id']} status={status} is an active execution")
+
+    waiting: list[str] = []
+    unfinished = False
     for task in tasks:
         status = effective_status(task["id"], project_state)
         if status in TERMINAL:
             continue
+        unfinished = True
+
+        if status in NONBLOCKING_WAIT:
+            waiting.append(f"{task['id']}:{status}")
+            continue
         if status not in RUNNABLE:
-            return QueueResult(None, f"{task['id']} status={status} blocks the queue")
-        for dep in task["depends_on"]:
-            dep_status = effective_status(dep, project_state)
-            if dep_status != "completed":
-                return QueueResult(None, f"{task['id']} waits for {dep} status={dep_status}")
+            waiting.append(f"{task['id']}:{status}")
+            continue
+
+        unmet = [
+            dep
+            for dep in task["depends_on"]
+            if effective_status(dep, project_state) != "completed"
+        ]
+        if unmet:
+            waiting.append(
+                f"{task['id']}:waits_for="
+                + ",".join(f"{dep}:{effective_status(dep, project_state)}" for dep in unmet)
+            )
+            continue
         return QueueResult(by_id[task["id"]], "ready")
-    return QueueResult(None, "queue_empty")
+
+    if not unfinished:
+        return QueueResult(None, "queue_empty")
+    summary = "; ".join(waiting[:8])
+    if len(waiting) > 8:
+        summary += f"; +{len(waiting) - 8} more"
+    return QueueResult(None, "no_runnable_tasks" + (f": {summary}" if summary else ""))
 
 
 def task_text(task: dict[str, Any]) -> str:
