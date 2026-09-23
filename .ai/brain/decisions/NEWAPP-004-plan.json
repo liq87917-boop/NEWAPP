@@ -1,0 +1,19 @@
+{
+  "task_id": "NEWAPP-004",
+  "decision": "execute",
+  "rationale": "Document the shared OSS contract used by NEWERP/NEWAPP so later upload/download work reuses the same bucket and object-key conventions without exposing long-lived credentials to mobile clients.",
+  "validation_focus": [
+    "Read configuration names and existing NEWERP/NEWAPP code conventions only; never record AccessKeySecret or other secret values.",
+    "Perform no OSS write/delete/upload operation and no destructive external action.",
+    "Document endpoint/bucket binding by configuration key name, object-key prefix/naming conventions when discoverable, and the server-side signed-ticket boundary.",
+    "Produce docs/SHARED_OSS_CONTRACT.md plus a value-safe generated artifact and focused tests."
+  ],
+  "risks": [
+    "Do not invent object-key conventions that are not discoverable.",
+    "Do not introduce a second OSS bucket or synchronization layer.",
+    "Mobile Flutter/ArkTS packages must never receive long-lived OSS credentials."
+  ],
+  "actor": "Codex GPT Hourly Rolling Planner",
+  "source": "codex_desktop_or_mobile_remote",
+  "recorded_at": "2026-09-23T12:00:00Z"
+}
