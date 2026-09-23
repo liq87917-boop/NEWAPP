@@ -32,5 +32,7 @@
     "criteria_results": [],
     "required_fixes": []
   },
-  "record_command": "start_agent.bat record-review NEWAPP-001 20260923T104246927931Z-78cb8b29 --decision accept --rationale <text>"
+  "record_command": "start_agent.bat record-review NEWAPP-001 20260923T104246927931Z-78cb8b29 --decision accept --rationale <text>",
+  "github_pr": "https://github.com/liq87917-boop/NEWAPP/pull/1",
+  "github_branch": "agent/newapp-001-78cb8b29"
 }

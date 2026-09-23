@@ -12,7 +12,7 @@
   "task_statuses": {
     "NEWAPP-001": {
       "status": "awaiting_review",
-      "updated_at": "2026-09-23T11:03:52.528627Z",
+      "updated_at": "2026-09-23T11:04:02.723318Z",
       "reason": "matched risk terms: signing",
       "approval": ".ai/decisions/NEWAPP-001-approved.json",
       "request": ".ai/brain/requests/NEWAPP-001-plan-request.json",
@@ -40,7 +40,8 @@
         "tests/baseline/test_repository_baseline.py",
         "tests/baseline/test_secret_scan.py"
       ],
-      "review_request": ".ai/brain/requests/NEWAPP-001-20260923T104246927931Z-78cb8b29-review-request.json"
+      "review_request": ".ai/brain/requests/NEWAPP-001-20260923T104246927931Z-78cb8b29-review-request.json",
+      "github_pr": "https://github.com/liq87917-boop/NEWAPP/pull/1"
     }
   },
   "last_validation": {
@@ -64,5 +65,5 @@
     "log": ".ai/logs/20260923T104246927931Z-78cb8b29-validation.log"
   },
   "last_review": null,
-  "updated_at": "2026-09-23T11:03:52.531669Z"
+  "updated_at": "2026-09-23T11:04:02.726595Z"
 }
