@@ -5,6 +5,7 @@ import queue
 import shutil
 import subprocess
 import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -82,17 +83,19 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
 
     timed_out = False
     reader_done = False
+    deadline = time.monotonic() + timeout
+    no_output = object()
     with log_path.open("w", encoding="utf-8", newline="\n") as log:
         while True:
             try:
                 item = output_queue.get(timeout=0.2)
             except queue.Empty:
-                item = "__NO_OUTPUT__"
+                item = no_output
 
             if item is None:
                 reader_done = True
-            elif item != "__NO_OUTPUT__":
-                cleaned = redact(item.rstrip("\r\n"), secret_env)
+            elif item is not no_output:
+                cleaned = redact(str(item).rstrip("\r\n"), secret_env)
                 if cleaned:
                     print(cleaned, flush=True)
                     log.write(cleaned + "\n")
@@ -101,9 +104,9 @@ def execute(task: dict[str, Any], plan: dict[str, Any], run_id: str, allowed_pat
             if process.poll() is not None and reader_done:
                 break
 
-            elapsed = (Path(log_path).stat().st_mtime if log_path.exists() else 0)
-            # Timeout enforcement is delegated to Cline's own --timeout flag.
-            # The outer controller still retains a hard kill fallback below.
+            if process.poll() is None and time.monotonic() >= deadline:
+                timed_out = True
+                process.kill()
 
         try:
             exit_code = process.wait(timeout=5)
