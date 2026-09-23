@@ -39,7 +39,7 @@ start_agent.bat resume
 start_agent.bat retry NEWAPP-001 --by "Name" --reason "Runtime issue corrected"
 ```
 
-Running `start_agent.bat` with no arguments performs a safe preflight only. `run-once` executes at most one approved task. `run` is the normal unattended mode: it keeps a rolling queue alive, executes one Cline/DeepSeek task at a time, pushes each completed candidate to its own `agent/NEWAPP-*` branch, records `awaiting_review` on `main`, then immediately continues with another dependency-safe task. If nothing is runnable, the controller stays alive, polls GitHub every 60 seconds, and resumes automatically when GPT review or a dependency unlock changes `main`.
+Running `start_agent.bat` with no arguments starts the normal unattended rolling mode. Use `start_agent.bat preflight` for a read-only environment check and `run-once` to execute at most one approved task. Rolling mode: it keeps a rolling queue alive, executes one Cline/DeepSeek task at a time, pushes each completed candidate to its own `agent/NEWAPP-*` branch, records `awaiting_review` on `main`, then immediately continues with another dependency-safe task. If nothing is runnable, the controller stays alive, polls GitHub every 60 seconds, and resumes automatically when GPT review or a dependency unlock changes `main`.
 
 
 ## Rolling GPT task pool
