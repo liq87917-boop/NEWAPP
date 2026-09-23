@@ -201,7 +201,26 @@
       "flutter",
       "arkui",
       "browser"
-    ]
+    ],
+    "task_commands": {
+      "NEWAPP-002": [
+        [
+          "{python}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/config",
+          "-p",
+          "test_*.py"
+        ],
+        [
+          "{python}",
+          "tests/baseline/secret_scan.py",
+          "--json"
+        ]
+      ]
+    }
   },
   "browser_acceptance": {
     "require_real_browser": true,
