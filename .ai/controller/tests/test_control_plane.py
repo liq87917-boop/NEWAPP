@@ -12,6 +12,7 @@ if str(CONTROLLER) not in sys.path:
 from task_loader import QueueResult, load_tasks, queue_head, requires_human_gate
 from common import config, path_matches
 from agent_loop import preflight
+from cline_executor import console_message
 
 
 class ControlPlaneContractTests(unittest.TestCase):
@@ -77,6 +78,14 @@ class ControlPlaneContractTests(unittest.TestCase):
         flattened = [" ".join(command) for command in commands]
         self.assertTrue(any("unittest discover -s tests/config" in command for command in flattened))
         self.assertTrue(any("tests/baseline/secret_scan.py --json" in command for command in flattened))
+
+    def test_cline_console_suppresses_reasoning_event_noise(self) -> None:
+        line = '{"ts":"2026-09-23T12:08:06.121Z","type":"agent_event","event":{"type":"content_start","contentType":"reasoning","reasoning":"status","redacted":false}}'
+        self.assertIsNone(console_message(line))
+
+    def test_cline_console_keeps_errors_visible(self) -> None:
+        line = '{"type":"agent_event","event":{"type":"error","message":"boom"}}'
+        self.assertEqual("[Cline] ERROR: boom", console_message(line))
 
     def test_hidden_control_artifact_matches_allowed_path(self) -> None:
         self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
