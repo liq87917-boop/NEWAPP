@@ -37,41 +37,171 @@
     "base_branch": "main",
     "branch_prefix": "agent/",
     "require_private": true,
-    "require_pull_request": true,
-    "merge_method": "squash"
+    "require_pull_request": false,
+    "merge_method": "squash",
+    "transport": "git_ssh",
+    "require_github_cli": false
   },
   "queue": {
-    "runnable_states": ["queued", "retry"],
-    "terminal_states": ["completed", "deferred", "skipped"],
-    "blocking_states": ["awaiting_brain", "awaiting_human", "executing", "code_ready", "validating", "awaiting_review", "blocked", "failed"],
+    "runnable_states": [
+      "queued",
+      "retry"
+    ],
+    "terminal_states": [
+      "completed",
+      "deferred",
+      "skipped"
+    ],
+    "blocking_states": [
+      "awaiting_brain",
+      "awaiting_human",
+      "executing",
+      "code_ready",
+      "validating",
+      "awaiting_review",
+      "blocked",
+      "failed"
+    ],
     "fail_closed": true
   },
   "paths": {
-    "protected": [".env", ".env.*", "agent.env", "agent.env.*", ".ai/controller/**", ".ai/agent_config.yaml", ".ai/project_state.json", ".ai/decisions/**", ".ai/brain/**", ".ai/locks/**", ".github/workflows/**", ".clinerules", "start_agent.bat", "**/*.pfx", "**/*.p12", "**/*.jks", "**/*.keystore", "**/*.pem", "**/*.key"],
-    "executor_allowed": ["src/**", "tests/**", "docs/**", "database/**", ".github/**", ".ai/generated/**", "*.sln", "*.md", ".gitignore"]
+    "protected": [
+      ".env",
+      ".env.*",
+      "agent.env",
+      "agent.env.*",
+      ".ai/controller/**",
+      ".ai/agent_config.yaml",
+      ".ai/project_state.json",
+      ".ai/decisions/**",
+      ".ai/brain/**",
+      ".ai/locks/**",
+      ".github/workflows/**",
+      ".clinerules",
+      "start_agent.bat",
+      "**/*.pfx",
+      "**/*.p12",
+      "**/*.jks",
+      "**/*.keystore",
+      "**/*.pem",
+      "**/*.key"
+    ],
+    "executor_allowed": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "database/**",
+      ".github/**",
+      ".ai/generated/**",
+      "*.sln",
+      "*.md",
+      ".gitignore"
+    ]
   },
   "human_gate": {
-    "task_ids": ["NEWAPP-009", "NEWAPP-060", "NEWAPP-066", "NEWAPP-067", "NEWAPP-068"],
-    "trigger_terms": ["production", "deploy", "release", "signing", "shared database write", "apply migration", "execute ddl", "alter table", "create table", "drop table", "truncate table"],
+    "task_ids": [
+      "NEWAPP-009",
+      "NEWAPP-060",
+      "NEWAPP-066",
+      "NEWAPP-067",
+      "NEWAPP-068"
+    ],
+    "trigger_terms": [
+      "production",
+      "deploy",
+      "release",
+      "signing",
+      "shared database write",
+      "apply migration",
+      "execute ddl",
+      "alter table",
+      "create table",
+      "drop table",
+      "truncate table"
+    ],
     "always_for_shared_database_structure": true,
-    "forbidden_even_with_approval": ["drop", "truncate", "destructive migration", "production dml", "production deployment"]
+    "forbidden_even_with_approval": [
+      "drop",
+      "truncate",
+      "destructive migration",
+      "production dml",
+      "production deployment"
+    ]
   },
   "environment": {
     "file": ".env",
     "required_key_groups": {
-      "database": ["ERP_ConnectionStrings__Default"],
-      "oss": ["ERP_Oss__Endpoint", "ERP_Oss__Bucket", "ERP_Oss__AccessKeyId", "ERP_Oss__AccessKeySecret"],
-      "auth": ["ERP_Jwt__Key"]
+      "database": [
+        "ERP_ConnectionStrings__Default"
+      ],
+      "oss": [
+        "ERP_Oss__Endpoint",
+        "ERP_Oss__Bucket",
+        "ERP_Oss__AccessKeyId",
+        "ERP_Oss__AccessKeySecret"
+      ],
+      "auth": [
+        "ERP_Jwt__Key"
+      ]
     },
-    "never_log_patterns": ["PASSWORD", "SECRET", "TOKEN", "KEY", "CONNECTIONSTRING", "ACCESSKEY"]
+    "never_log_patterns": [
+      "PASSWORD",
+      "SECRET",
+      "TOKEN",
+      "KEY",
+      "CONNECTIONSTRING",
+      "ACCESSKEY"
+    ]
   },
   "validation": {
     "profiles": {
-      "control_plane": [["{python}", "-m", "compileall", "-q", ".ai/controller"], ["{python}", "-m", "unittest", "discover", "-s", ".ai/controller/tests", "-p", "test_*.py"]],
-      "safe": [["{python}", "-m", "compileall", "-q", ".ai/controller"]]
+      "control_plane": [
+        [
+          "{python}",
+          "-m",
+          "compileall",
+          "-q",
+          ".ai/controller"
+        ],
+        [
+          "{python}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          ".ai/controller/tests",
+          "-p",
+          "test_*.py"
+        ]
+      ],
+      "safe": [
+        [
+          "{python}",
+          "-m",
+          "compileall",
+          "-q",
+          ".ai/controller"
+        ]
+      ]
     },
-    "dangerous_command_tokens": ["drop", "truncate", "sqlcmd", "invoke-sqlcmd", "migrate", "deploy", "publish", "sign"],
-    "require_screenshot_when_terms": ["ui", "screen", "visual", "flutter", "arkui", "browser"]
+    "dangerous_command_tokens": [
+      "drop",
+      "truncate",
+      "sqlcmd",
+      "invoke-sqlcmd",
+      "migrate",
+      "deploy",
+      "publish",
+      "sign"
+    ],
+    "require_screenshot_when_terms": [
+      "ui",
+      "screen",
+      "visual",
+      "flutter",
+      "arkui",
+      "browser"
+    ]
   },
   "browser_acceptance": {
     "require_real_browser": true,
