@@ -53,16 +53,18 @@
       "skipped"
     ],
     "blocking_states": [
-      "awaiting_brain",
-      "awaiting_human",
       "executing",
       "code_ready",
-      "validating",
+      "validating"
+    ],
+    "fail_closed": true,
+    "nonblocking_wait_states": [
+      "awaiting_brain",
+      "awaiting_human",
       "awaiting_review",
       "blocked",
       "failed"
-    ],
-    "fail_closed": true
+    ]
   },
   "paths": {
     "protected": [
@@ -234,5 +236,13 @@
     "decisions_dir": ".ai/decisions",
     "locks_dir": ".ai/locks",
     "hash_algorithm": "sha256"
+  },
+  "rolling_queue": {
+    "enabled": true,
+    "target_size": 4,
+    "idle_poll_seconds": 60,
+    "review_interval_minutes": 60,
+    "allow_unrelated_tasks_while_review_pending": true,
+    "dependency_rule": "Only tasks whose declared dependencies are completed may execute; awaiting_review/awaiting_brain/awaiting_human/failed tasks do not globally block unrelated work."
   }
 }
