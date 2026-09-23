@@ -28,11 +28,27 @@ class ControlPlaneContractTests(unittest.TestCase):
         self.assertEqual("ready", result.reason)
         self.assertEqual(self.tasks[0]["id"], result.task["id"])
 
-    def test_nonterminal_head_cannot_be_skipped(self) -> None:
-        first = self.tasks[0]["id"]
-        result = queue_head(self.tasks, {"task_statuses": {first: {"status": "failed"}}})
+    def test_pending_review_does_not_block_unrelated_ready_task(self) -> None:
+        state = {
+            "task_statuses": {
+                "NEWAPP-001": {"status": "completed"},
+                "NEWAPP-002": {"status": "awaiting_review"},
+            }
+        }
+        result = queue_head(self.tasks, state)
+        self.assertEqual("ready", result.reason)
+        self.assertEqual("NEWAPP-006", result.task["id"])
+
+    def test_active_execution_remains_exclusive(self) -> None:
+        state = {
+            "task_statuses": {
+                "NEWAPP-001": {"status": "completed"},
+                "NEWAPP-002": {"status": "executing"},
+            }
+        }
+        result = queue_head(self.tasks, state)
         self.assertIsNone(result.task)
-        self.assertIn(first, result.reason)
+        self.assertIn("active execution", result.reason)
 
     def test_shared_database_migration_has_human_gate(self) -> None:
         task = next(item for item in self.tasks if item["id"] == "NEWAPP-009")
@@ -65,6 +81,13 @@ class ControlPlaneContractTests(unittest.TestCase):
     def test_hidden_control_artifact_matches_allowed_path(self) -> None:
         self.assertTrue(path_matches(".ai/generated/evidence.json", [".ai/generated/**"]))
         self.assertTrue(path_matches("./.ai/generated/evidence.json", [".ai/generated/**"]))
+
+    def test_rolling_queue_is_enabled(self) -> None:
+        settings = config()["rolling_queue"]
+        self.assertTrue(settings["enabled"])
+        self.assertEqual(4, settings["target_size"])
+        self.assertEqual(60, settings["review_interval_minutes"])
+        self.assertTrue(settings["allow_unrelated_tasks_while_review_pending"])
 
     def test_github_relay_uses_private_git_transport_without_gh_requirement(self) -> None:
         settings = config()["github_relay"]
