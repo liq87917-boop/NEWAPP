@@ -237,9 +237,22 @@ def run_one(*, plan_only: bool = False) -> int:
         try:
             relay = publish_candidate(task, run_id, branch, manifest["path_guard"]["changed_paths"], manifest["manifest_path"], relative_request)
             request_value = json.loads(review_request.read_text(encoding="utf-8"))
-            request_value.update({"github_pr": relay["pr_url"], "github_branch": branch})
+            request_value.update({
+                "github_pr": relay.get("pr_url"),
+                "github_branch": branch,
+                "github_review_url": relay.get("review_url"),
+                "github_relay_mode": relay.get("relay_mode", "git_branch"),
+            })
             atomic_json(review_request, request_value)
-            set_task_status(project_state, task["id"], "awaiting_review", github_pr=relay["pr_url"], branch=branch)
+            set_task_status(
+                project_state,
+                task["id"],
+                "awaiting_review",
+                github_pr=relay.get("pr_url"),
+                github_review_url=relay.get("review_url"),
+                github_relay_mode=relay.get("relay_mode", "git_branch"),
+                branch=branch,
+            )
             save_state(project_state)
             publish_branch_metadata(f"{task['id']}: attach GPT review metadata", [relative_request, ".ai/project_state.json"], branch)
         except Exception as exc:
@@ -248,7 +261,16 @@ def run_one(*, plan_only: bool = False) -> int:
             audit("github_candidate_publish_failed", task_id=task["id"], run_id=run_id, error=str(exc))
             print(f"GitHub candidate publication failed: {exc}", file=sys.stderr)
             return 23
-        print(json.dumps({"status": "awaiting_codex_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request, "github_pr": relay["pr_url"]}, ensure_ascii=False, indent=2))
+        print(json.dumps({
+            "status": "awaiting_codex_gpt_review",
+            "task_id": task["id"],
+            "run_id": run_id,
+            "request": relative_request,
+            "github_branch": branch,
+            "github_review_url": relay.get("review_url"),
+            "github_pr": relay.get("pr_url"),
+            "github_relay_mode": relay.get("relay_mode", "git_branch"),
+        }, ensure_ascii=False, indent=2))
         return 17
 
 
