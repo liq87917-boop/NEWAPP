@@ -2,24 +2,26 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "ready",
+  "phase": "blocked",
   "paused": false,
   "pause_reason": null,
   "current_task": null,
   "last_completed_task": null,
   "last_run_id": null,
-  "blocker": null,
+  "blocker": "Working tree must be clean before creating a task branch",
   "task_statuses": {
     "NEWAPP-001": {
-      "status": "retry",
-      "updated_at": "2026-09-23T10:38:53.645237Z",
+      "status": "blocked",
+      "updated_at": "2026-09-23T10:39:20.403629Z",
       "reason": "matched risk terms: signing",
       "approval": ".ai/decisions/NEWAPP-001-approved.json",
       "request": ".ai/brain/requests/NEWAPP-001-plan-request.json",
-      "brain_decision": ".ai/brain/decisions/NEWAPP-001-plan.json"
+      "brain_decision": ".ai/brain/decisions/NEWAPP-001-plan.json",
+      "error": "Working tree must be clean before creating a task branch",
+      "run_id": "20260923T103918340385Z-a34dcd3d"
     }
   },
   "last_validation": null,
   "last_review": null,
-  "updated_at": "2026-09-23T10:38:53.648726Z"
+  "updated_at": "2026-09-23T10:39:20.406789Z"
 }

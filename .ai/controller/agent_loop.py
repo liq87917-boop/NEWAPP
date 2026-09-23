@@ -168,8 +168,8 @@ def run_one(*, plan_only: bool = False) -> int:
                 return 19
             print(json.dumps({"status": "awaiting_codex_gpt", "task_id": task["id"], "request": relative_request}, ensure_ascii=False, indent=2))
             return 16
-        audit("brain_plan", task_id=task["id"], decision=decision["decision"], rationale=decision["rationale"])
         if decision["decision"] != "execute":
+            audit("brain_plan", task_id=task["id"], decision=decision["decision"], rationale=decision["rationale"])
             status = "awaiting_human" if decision["decision"] == "human_gate" else "blocked"
             set_task_status(project_state, task["id"], status, reason=decision["rationale"])
             save_state(project_state, phase=status, blocker=decision["rationale"])
@@ -189,6 +189,7 @@ def run_one(*, plan_only: bool = False) -> int:
             audit("github_branch_prepare_failed", task_id=task["id"], run_id=run_id, error=str(exc))
             print(f"GitHub relay could not prepare task branch: {exc}", file=sys.stderr)
             return 18
+        audit("brain_plan", task_id=task["id"], run_id=run_id, branch=branch, decision=decision["decision"], rationale=decision["rationale"])
         previous_attempts = int(project_state.setdefault("task_statuses", {}).setdefault(task["id"], {}).get("attempts", 0))
         max_attempts = int(config()["runtime"].get("max_attempts_per_task", 3))
         if previous_attempts >= max_attempts:
