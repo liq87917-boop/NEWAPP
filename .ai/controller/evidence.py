@@ -44,4 +44,5 @@ def build(task: dict[str, Any], run_id: str, executor: dict[str, Any], validatio
         "note": "Cline success is code_ready only; GPT final review is still required."
     }
     atomic_json(evidence_dir / "manifest.json", manifest)
+    manifest["manifest_path"] = str((evidence_dir / "manifest.json").relative_to(ROOT)).replace("\\", "/")
     return manifest

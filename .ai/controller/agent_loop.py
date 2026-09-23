@@ -19,6 +19,7 @@ from browser_acceptance import evaluate as browser_acceptance
 from common import ROOT, audit, atomic_json, config, git, read_env, save_state, state, utc_now
 from evidence import build as build_evidence
 from git_manager import changed_paths, checkpoint, guard_changes, has_head, is_repository
+from gpt_brain import load_plan, record_plan, record_review, request_plan, request_review
 from task_loader import effective_status, load_tasks, queue_head, requires_human_gate
 from validator import runtime_checks, validate
 
@@ -73,8 +74,6 @@ def preflight(write_state: bool = True) -> int:
     for group, keys in cfg["environment"]["required_key_groups"].items():
         missing = [key for key in keys if not env.get(key)]
         groups[group] = {"configured": len(keys) - len(missing), "required": len(keys), "missing_keys": missing}
-        if group == "brain" and missing:
-            blockers.append("GPT brain configuration missing: " + ", ".join(missing))
     git_ok = is_repository()
     head_ok = has_head()
     if cfg["runtime"].get("require_git") and not git_ok:
@@ -96,6 +95,7 @@ def preflight(write_state: bool = True) -> int:
         "environment_groups": groups,
         "runtime": checks,
         "git": {"repository": git_ok, "baseline_commit": head_ok},
+        "brain": {"mode": cfg["brain"]["mode"], "api_key_required": False},
         "blockers": blockers,
         "safe_default": "preflight_only_no_business_task_started",
     }
@@ -122,8 +122,6 @@ def allowed_paths(task: dict[str, Any]) -> list[str]:
 
 
 def run_one(*, plan_only: bool = False) -> int:
-    from gpt_brain import plan as brain_plan, review as brain_review
-
     with controller_lock():
         project_state = state()
         if project_state.get("paused"):
@@ -142,27 +140,33 @@ def run_one(*, plan_only: bool = False) -> int:
             audit("human_gate_required", task_id=task["id"], reason=gate_reason)
             print(f"{task['id']} requires Human Gate approval: {gate_reason}", file=sys.stderr)
             return 12
-        set_task_status(project_state, task["id"], "awaiting_brain")
-        save_state(project_state, phase="planning", current_task=task["id"], blocker=None)
         try:
-            decision = brain_plan(task)
+            decision = load_plan(task["id"])
         except Exception as exc:
             set_task_status(project_state, task["id"], "blocked", error=str(exc))
             save_state(project_state, phase="blocked", blocker=str(exc))
             audit("brain_plan_failed", task_id=task["id"], error=str(exc))
-            print(f"GPT planning failed: {exc}", file=sys.stderr)
+            print(f"Desktop GPT plan decision is invalid: {exc}", file=sys.stderr)
             return 14
-        audit("brain_plan", task_id=task["id"], decision=decision.decision, rationale=decision.rationale)
-        if decision.decision != "execute":
-            status = "awaiting_human" if decision.decision == "human_gate" else "blocked"
-            set_task_status(project_state, task["id"], status, reason=decision.rationale)
-            save_state(project_state, phase=status, blocker=decision.rationale)
-            print(decision.model_dump_json(indent=2))
+        if decision is None:
+            request_path = request_plan(task)
+            relative_request = str(request_path.relative_to(ROOT)).replace("\\", "/")
+            set_task_status(project_state, task["id"], "awaiting_brain", request=relative_request)
+            save_state(project_state, phase="awaiting_desktop_gpt", current_task=task["id"], blocker="Desktop GPT plan decision required")
+            audit("desktop_brain_plan_requested", task_id=task["id"], request=relative_request)
+            print(json.dumps({"status": "awaiting_desktop_gpt", "task_id": task["id"], "request": relative_request}, ensure_ascii=False, indent=2))
+            return 16
+        audit("brain_plan", task_id=task["id"], decision=decision["decision"], rationale=decision["rationale"])
+        if decision["decision"] != "execute":
+            status = "awaiting_human" if decision["decision"] == "human_gate" else "blocked"
+            set_task_status(project_state, task["id"], status, reason=decision["rationale"])
+            save_state(project_state, phase=status, blocker=decision["rationale"])
+            print(json.dumps(decision, ensure_ascii=False, indent=2))
             return 12 if status == "awaiting_human" else 13
         if plan_only:
-            set_task_status(project_state, task["id"], "queued", last_plan=decision.model_dump())
+            set_task_status(project_state, task["id"], "queued", last_plan=decision)
             save_state(project_state, phase="ready", current_task=None)
-            print(decision.model_dump_json(indent=2))
+            print(json.dumps(decision, ensure_ascii=False, indent=2))
             return 0
         run_id = utc_now().replace("-", "").replace(":", "").replace(".", "") + "-" + uuid.uuid4().hex[:8]
         before = set(changed_paths())
@@ -175,7 +179,7 @@ def run_one(*, plan_only: bool = False) -> int:
         set_task_status(project_state, task["id"], "executing", run_id=run_id, attempts=previous_attempts + 1)
         save_state(project_state, phase="executing", last_run_id=run_id)
         try:
-            executor_result = execute(task, decision.model_dump(), run_id, allowed_paths(task))
+            executor_result = execute(task, decision, run_id, allowed_paths(task))
         except Exception as exc:
             set_task_status(project_state, task["id"], "failed", error=str(exc), run_id=run_id)
             save_state(project_state, phase="failed", blocker=str(exc))
@@ -204,30 +208,13 @@ def run_one(*, plan_only: bool = False) -> int:
             save_state(project_state, phase="failed", blocker="Validation/evidence/path guard did not pass", last_validation=validation)
             audit("evidence_insufficient", task_id=task["id"], run_id=run_id)
             return 21
-        set_task_status(project_state, task["id"], "awaiting_review")
-        save_state(project_state, phase="awaiting_review", last_validation=validation)
-        try:
-            review = brain_review(task, manifest)
-        except Exception as exc:
-            set_task_status(project_state, task["id"], "failed", error=str(exc), run_id=run_id)
-            save_state(project_state, phase="failed", blocker=str(exc))
-            audit("brain_review_failed", task_id=task["id"], run_id=run_id, error=str(exc))
-            print(f"GPT final review failed: {exc}", file=sys.stderr)
-            return 22
-        review_path = ROOT / config()["evidence"]["decisions_dir"] / f"{run_id}-gpt-review.json"
-        atomic_json(review_path, review.model_dump())
-        if review.decision != "accept":
-            status = "awaiting_human" if review.decision == "human_gate" else "failed"
-            set_task_status(project_state, task["id"], status, review=review.model_dump())
-            save_state(project_state, phase=status, blocker=review.rationale, last_review=review.model_dump())
-            audit("gpt_review_rejected", task_id=task["id"], run_id=run_id, decision=review.decision)
-            return 22
-        set_task_status(project_state, task["id"], "completed", review=review.model_dump(), run_id=run_id)
-        save_state(project_state, phase="ready", current_task=None, last_completed_task=task["id"], blocker=None, last_review=review.model_dump())
-        commit_result = checkpoint(task["id"], str(task.get("title", "task")), manifest["path_guard"]["changed_paths"]) if config()["runtime"].get("auto_commit_after_acceptance") else {"status": "disabled"}
-        audit("task_completed", task_id=task["id"], run_id=run_id, checkpoint=commit_result)
-        print(json.dumps({"task": task["id"], "status": "completed", "checkpoint": commit_result}, ensure_ascii=False, indent=2))
-        return 0
+        review_request = request_review(task, run_id, manifest["manifest_path"])
+        relative_request = str(review_request.relative_to(ROOT)).replace("\\", "/")
+        set_task_status(project_state, task["id"], "awaiting_review", run_id=run_id, evidence_manifest=manifest["manifest_path"], changed_paths=manifest["path_guard"]["changed_paths"], review_request=relative_request)
+        save_state(project_state, phase="awaiting_desktop_gpt_review", last_validation=validation, blocker="Desktop GPT final review required")
+        audit("desktop_brain_review_requested", task_id=task["id"], run_id=run_id, request=relative_request)
+        print(json.dumps({"status": "awaiting_desktop_gpt_review", "task_id": task["id"], "run_id": run_id, "request": relative_request}, ensure_ascii=False, indent=2))
+        return 17
 
 
 def approve(args: argparse.Namespace) -> int:
@@ -266,6 +253,44 @@ def retry(args: argparse.Namespace) -> int:
     return 0
 
 
+def record_plan_command(args: argparse.Namespace) -> int:
+    project_state = state()
+    if args.task_id not in {task["id"] for task in load_tasks()}:
+        print(f"Unknown task: {args.task_id}", file=sys.stderr); return 2
+    path = record_plan(args.task_id, args.decision, args.rationale, args.validation_focus, args.risk, args.by)
+    next_status = "retry" if args.decision == "execute" else ("awaiting_human" if args.decision == "human_gate" else "blocked")
+    set_task_status(project_state, args.task_id, next_status, brain_decision=str(path.relative_to(ROOT)).replace("\\", "/"))
+    save_state(project_state, phase="ready" if next_status == "retry" else next_status, current_task=None if next_status == "retry" else args.task_id, blocker=None if next_status == "retry" else args.rationale)
+    audit("desktop_brain_plan_recorded", task_id=args.task_id, decision=args.decision, actor=args.by)
+    print(str(path))
+    return 0
+
+
+def record_review_command(args: argparse.Namespace) -> int:
+    project_state = state()
+    task = next((item for item in load_tasks() if item["id"] == args.task_id), None)
+    if task is None:
+        print(f"Unknown task: {args.task_id}", file=sys.stderr); return 2
+    entry = project_state.get("task_statuses", {}).get(args.task_id, {})
+    if entry.get("status") != "awaiting_review" or entry.get("run_id") != args.run_id:
+        print("Review does not match the pending task/run", file=sys.stderr); return 3
+    path = record_review(args.task_id, args.run_id, args.decision, args.rationale, args.criterion, args.required_fix, args.by)
+    review = json.loads(path.read_text(encoding="utf-8"))
+    if args.decision != "accept":
+        next_status = "awaiting_human" if args.decision == "human_gate" else "failed"
+        set_task_status(project_state, args.task_id, next_status, review=review)
+        save_state(project_state, phase=next_status, blocker=args.rationale, last_review=review)
+        audit("desktop_brain_review_recorded", task_id=args.task_id, run_id=args.run_id, decision=args.decision, actor=args.by)
+        return 0
+    changed = [str(item) for item in entry.get("changed_paths", [])]
+    commit_result = checkpoint(args.task_id, str(task.get("title", "task")), changed) if config()["runtime"].get("auto_commit_after_acceptance") else {"status": "disabled"}
+    set_task_status(project_state, args.task_id, "completed", review=review, run_id=args.run_id, checkpoint=commit_result)
+    save_state(project_state, phase="ready", current_task=None, last_completed_task=args.task_id, blocker=None, last_review=review)
+    audit("task_completed", task_id=args.task_id, run_id=args.run_id, checkpoint=commit_result, actor=args.by)
+    print(json.dumps({"task": args.task_id, "status": "completed", "checkpoint": commit_result}, ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="NEWAPP guarded GPT/Cline automation control plane")
     sub = parser.add_subparsers(dest="command")
@@ -280,6 +305,10 @@ def main() -> int:
     sub.add_parser("resume")
     retry_parser = sub.add_parser("retry")
     retry_parser.add_argument("task_id"); retry_parser.add_argument("--by", required=True); retry_parser.add_argument("--reason", required=True)
+    plan_parser = sub.add_parser("record-plan")
+    plan_parser.add_argument("task_id"); plan_parser.add_argument("--decision", choices=["execute", "human_gate", "block"], required=True); plan_parser.add_argument("--rationale", required=True); plan_parser.add_argument("--validation-focus", action="append", default=[]); plan_parser.add_argument("--risk", action="append", default=[]); plan_parser.add_argument("--by", default="Codex Desktop GPT")
+    review_parser = sub.add_parser("record-review")
+    review_parser.add_argument("task_id"); review_parser.add_argument("run_id"); review_parser.add_argument("--decision", choices=["accept", "reject", "human_gate"], required=True); review_parser.add_argument("--rationale", required=True); review_parser.add_argument("--criterion", action="append", default=[]); review_parser.add_argument("--required-fix", action="append", default=[]); review_parser.add_argument("--by", default="Codex Desktop GPT")
     args = parser.parse_args()
     command = args.command or config()["runtime"]["default_command"]
     if command == "preflight": return preflight()
@@ -290,6 +319,8 @@ def main() -> int:
     if command == "pause": return pause_resume(True, args.reason)
     if command == "resume": return pause_resume(False)
     if command == "retry": return retry(args)
+    if command == "record-plan": return record_plan_command(args)
+    if command == "record-review": return record_review_command(args)
     if command == "run":
         while True:
             result = run_one()

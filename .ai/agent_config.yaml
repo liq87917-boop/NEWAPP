@@ -16,13 +16,17 @@
     "default_command": "preflight",
     "max_attempts_per_task": 3,
     "cline_timeout_seconds": 3600,
-    "openai_model_env": "OPENAI_MODEL",
-    "openai_default_model": "gpt-6-astra",
     "cline_command": "cline",
     "require_git": true,
     "require_baseline_commit": true,
     "auto_commit_after_acceptance": true,
     "auto_push": false
+  },
+  "brain": {
+    "mode": "codex_desktop_file_bridge",
+    "requests_dir": ".ai/brain/requests",
+    "decisions_dir": ".ai/brain/decisions",
+    "api_key_required": false
   },
   "queue": {
     "runnable_states": ["queued", "retry"],
@@ -45,8 +49,7 @@
     "required_key_groups": {
       "database": ["ERP_ConnectionStrings__Default"],
       "oss": ["ERP_Oss__Endpoint", "ERP_Oss__Bucket", "ERP_Oss__AccessKeyId", "ERP_Oss__AccessKeySecret"],
-      "auth": ["ERP_Jwt__Key"],
-      "brain": ["OPENAI_API_KEY"]
+      "auth": ["ERP_Jwt__Key"]
     },
     "never_log_patterns": ["PASSWORD", "SECRET", "TOKEN", "KEY", "CONNECTIONSTRING", "ACCESSKEY"]
   },

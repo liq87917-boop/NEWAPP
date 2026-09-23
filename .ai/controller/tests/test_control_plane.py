@@ -9,6 +9,7 @@ if str(CONTROLLER) not in sys.path:
     sys.path.insert(0, str(CONTROLLER))
 
 from task_loader import QueueResult, load_tasks, queue_head, requires_human_gate
+from common import config
 
 
 class ControlPlaneContractTests(unittest.TestCase):
@@ -40,6 +41,11 @@ class ControlPlaneContractTests(unittest.TestCase):
         task = next(item for item in self.tasks if item["id"] == "NEWAPP-003")
         required, _ = requires_human_gate(task)
         self.assertFalse(required)
+
+    def test_brain_uses_desktop_bridge_without_api_key(self) -> None:
+        settings = config()["brain"]
+        self.assertEqual("codex_desktop_file_bridge", settings["mode"])
+        self.assertFalse(settings["api_key_required"])
 
 
 if __name__ == "__main__":
