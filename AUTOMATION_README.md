@@ -6,7 +6,7 @@ This control plane keeps GPT in Codex desktop or ChatGPT mobile Remote as the pl
 
 - `docs/NEWAPP_TASKS_V1.yaml` is the immutable task blueprint and dependency source.
 - `.ai/project_state.json` is the only mutable queue/status source.
-- Queue selection is local and deterministic: the first unfinished task blocks all later tasks until its dependencies and gates are satisfied.
+- Queue selection is local and dependency-safe, but no longer globally serialized by review waits. A task in `awaiting_review`, `awaiting_brain`, `awaiting_human`, `blocked`, or `failed` does not stop unrelated tasks whose declared dependencies are already `completed`; active execution states remain exclusive.
 - Cline exit code 0 becomes `code_ready`, never `completed`.
 - A task completes only after local validation, an evidence manifest, and a final file-backed decision from Codex desktop GPT all pass.
 - `.env` is loaded only in memory. Logs and evidence are redacted and never contain secret values.
@@ -39,7 +39,36 @@ start_agent.bat resume
 start_agent.bat retry NEWAPP-001 --by "Name" --reason "Runtime issue corrected"
 ```
 
-Running `start_agent.bat` with no arguments performs a safe preflight only. It does not start a business task. `plan` writes a request under `.ai/brain/requests/` and pauses. Codex GPT on desktop or mobile Remote reads that request and records a decision. `run-once` then lets DeepSeek/Cline execute at most one approved task, validates it, writes the evidence review request, and pauses again for Codex GPT final acceptance. The queue never advances while either Codex decision is missing.
+Running `start_agent.bat` with no arguments performs a safe preflight only. `run-once` executes at most one approved task. `run` is the normal unattended mode: it keeps a rolling queue alive, executes one Cline/DeepSeek task at a time, pushes each completed candidate to its own `agent/NEWAPP-*` branch, records `awaiting_review` on `main`, then immediately continues with another dependency-safe task. If nothing is runnable, the controller stays alive, polls GitHub every 60 seconds, and resumes automatically when GPT review or a dependency unlock changes `main`.
+
+
+## Rolling GPT task pool
+
+The target pool size is four GPT-planned tasks when the dependency graph allows it. GPT may pre-plan tasks before they become runnable; the local controller still enforces declared dependencies and Human Gates. ChatGPT performs an hourly GitHub review cycle: inspect all pending candidate branches, accept/reject them against evidence, merge accepted work, update task state on `main`, and replenish the plan pool. This means Cline does not wait for GPT after every individual task.
+
+Expected unattended flow:
+
+```text
+GPT seeds multiple plans on main
+        ↓
+start_agent.bat run
+        ↓
+Cline executes one dependency-safe task
+        ↓
+validation + evidence
+        ↓
+push agent/NEWAPP-* candidate
+        ↓
+mark awaiting_review on main
+        ↓
+continue next independent task
+        ↓
+idle-poll GitHub when temporarily blocked
+        ↓
+hourly GPT review merges/rejects candidates and replenishes plans
+        ↓
+local agent pulls main and continues automatically
+```
 
 ## Mobile Remote
 
