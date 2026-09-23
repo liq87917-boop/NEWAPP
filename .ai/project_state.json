@@ -2,13 +2,13 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "ready",
+  "phase": "awaiting_codex_gpt",
   "paused": false,
   "pause_reason": null,
-  "current_task": null,
+  "current_task": "NEWAPP-002",
   "last_completed_task": "NEWAPP-001",
   "last_run_id": "20260923T104246927931Z-78cb8b29",
-  "blocker": null,
+  "blocker": "Codex desktop/mobile GPT plan decision required",
   "task_statuses": {
     "NEWAPP-001": {
       "status": "completed",
@@ -59,6 +59,11 @@
         "source": "codex_desktop_or_mobile_remote",
         "recorded_at": "2026-09-23T11:07:20.063051Z"
       }
+    },
+    "NEWAPP-002": {
+      "status": "awaiting_brain",
+      "updated_at": "2026-09-23T11:08:52.543282Z",
+      "request": ".ai/brain/requests/NEWAPP-002-plan-request.json"
     }
   },
   "last_validation": {
@@ -98,5 +103,5 @@
     "source": "codex_desktop_or_mobile_remote",
     "recorded_at": "2026-09-23T11:07:20.063051Z"
   },
-  "updated_at": "2026-09-23T11:07:20.068824Z"
+  "updated_at": "2026-09-23T11:08:52.546221Z"
 }
