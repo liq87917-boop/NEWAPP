@@ -1,0 +1,1353 @@
+{
+  "task_id": "NEWAPP-004",
+  "task_title": "Inspect shared OSS contract",
+  "task_phase": "P0",
+  "task_depends_on": [
+    "NEWAPP-002"
+  ],
+  "artifact": "shared_oss_contract",
+  "schema_version": 1,
+  "generated_at": "2026-09-24T12:06:31.636168Z",
+  "generated_by": "newapp_executor (Cline/DeepSeek)",
+  "completion_authority": "the GPT brain (Codex desktop / ChatGPT mobile Remote) review, never the executor",
+  "executor_payload": {
+    "controller_payload_section_present": false,
+    "sources": [
+      "docs/NEWAPP_TASKS_V1.yaml#NEWAPP-004",
+      ".ai/brain/decisions/NEWAPP-004-plan.json",
+      ".ai/agent_config.yaml#environment.required_key_groups",
+      ".ai/agent_config.yaml#paths.executor_allowed"
+    ],
+    "note": "Task identity, GPT plan, required key names and allowed paths were read from the controller-owned records listed in sources. No queue, approval, branch or state file was written by the executor."
+  },
+  "safety_contract": {
+    "environment_file_access": "read-only",
+    "environment_file_written": false,
+    "environment_file_modified_time_unchanged_during_run": true,
+    "endpoint_text_recorded": false,
+    "bucket_name_recorded": false,
+    "credential_material_read": false,
+    "credential_material_recorded": false,
+    "credential_material_hashed": false,
+    "oss_calls_made": false,
+    "oss_objects_uploaded_listed_copied_or_deleted": 0,
+    "database_connections_made": false,
+    "network_calls_made": false,
+    "ddl_executed": false,
+    "reference_tree_written": false,
+    "note": "Only names, presence booleans, line numbers, counts, one provider family label and shape flags are recorded. The shared bucket is never contacted and no object is uploaded, listed, copied or deleted by this task."
+  },
+  "environment": {
+    "path_label": ".env",
+    "exists": true,
+    "read_only": true,
+    "byte_count": 669,
+    "declaration_count": 6,
+    "line_count": 16,
+    "oss_names": [
+      "ERP_Oss__AccessKeyId",
+      "ERP_Oss__AccessKeySecret",
+      "ERP_Oss__Bucket",
+      "ERP_Oss__Endpoint"
+    ],
+    "names": [
+      "ERP_ConnectionStrings__Default",
+      "ERP_Jwt__Key",
+      "ERP_Oss__AccessKeyId",
+      "ERP_Oss__AccessKeySecret",
+      "ERP_Oss__Bucket",
+      "ERP_Oss__Endpoint"
+    ],
+    "oss_entries": [
+      {
+        "name": "ERP_Oss__AccessKeyId",
+        "line": 12,
+        "group": "oss",
+        "configured": true,
+        "quoted": false,
+        "duplicate": false,
+        "export_prefixed": false
+      },
+      {
+        "name": "ERP_Oss__AccessKeySecret",
+        "line": 13,
+        "group": "oss",
+        "configured": true,
+        "quoted": false,
+        "duplicate": false,
+        "export_prefixed": false
+      },
+      {
+        "name": "ERP_Oss__Bucket",
+        "line": 14,
+        "group": "oss",
+        "configured": true,
+        "quoted": false,
+        "duplicate": false,
+        "export_prefixed": false
+      },
+      {
+        "name": "ERP_Oss__Endpoint",
+        "line": 15,
+        "group": "oss",
+        "configured": true,
+        "quoted": false,
+        "duplicate": false,
+        "export_prefixed": false
+      }
+    ],
+    "endpoint": {
+      "name": "ERP_Oss__Endpoint",
+      "declared": true,
+      "configured": true,
+      "quoted": false,
+      "has_scheme": false,
+      "uses_secure_scheme": false,
+      "has_explicit_port": false,
+      "host_label_count": 3,
+      "looks_like_ipv4_literal": false,
+      "has_path_component": false,
+      "provider_family": "aliyun_oss",
+      "provider_suffix_matched": true,
+      "text_recorded": false
+    },
+    "bucket": {
+      "name": "ERP_Oss__Bucket",
+      "declared": true,
+      "bucket_name_recorded": false,
+      "configured": true,
+      "quoted": false
+    },
+    "material": [
+      {
+        "name": "ERP_Oss__AccessKeyId",
+        "declared": true,
+        "configured": true,
+        "quoted": false,
+        "material_read": false,
+        "material_recorded": false,
+        "issued_to_client": false
+      },
+      {
+        "name": "ERP_Oss__AccessKeySecret",
+        "declared": true,
+        "configured": true,
+        "quoted": false,
+        "material_read": false,
+        "material_recorded": false,
+        "issued_to_client": false
+      }
+    ],
+    "duplicate_oss_names": [],
+    "modified_time_unchanged_during_run": true,
+    "values_recorded": false
+  },
+  "required_oss_names": {
+    "available": true,
+    "source": ".ai/agent_config.yaml#environment.required_key_groups",
+    "required": [
+      "ERP_Oss__Endpoint",
+      "ERP_Oss__Bucket",
+      "ERP_Oss__AccessKeyId",
+      "ERP_Oss__AccessKeySecret"
+    ],
+    "required_count": 4,
+    "present": [
+      "ERP_Oss__Endpoint",
+      "ERP_Oss__Bucket",
+      "ERP_Oss__AccessKeyId",
+      "ERP_Oss__AccessKeySecret"
+    ],
+    "present_count": 4,
+    "missing": [],
+    "unconfigured": [],
+    "all_present": true
+  },
+  "provider": {
+    "identification_method": "endpoint host suffix compared with the documented provider suffix list of this module; only the family label and a boolean are recorded, never the endpoint text",
+    "documented_suffix_family_count": 6,
+    "endpoint_declared": true,
+    "endpoint_configured": true,
+    "family": "aliyun_oss",
+    "suffix_matched": true,
+    "unrecognised_family_label": "unrecognised",
+    "endpoint_text_recorded": false,
+    "note": "The family label is the only provider fact recorded. The endpoint text, the bucket name and the credential material stay in the local environment file."
+  },
+  "bucket_policy": {
+    "shared_bucket_count": 1,
+    "second_bucket_created": false,
+    "synchronisation_service_created": false,
+    "bucket_column_optional_in_asset_table": true,
+    "configured_bucket_is_the_default": true,
+    "rules": [
+      "NEWAPP and NEWERP share one OSS bucket and one object namespace. NEWAPP never creates a second bucket, a NEWAPP-only bucket or a parallel object store.",
+      "No NEWAPP/NEWERP object synchronisation service exists. Both applications read and write the shared bucket through this contract, and shared asset metadata lives in the shared database.",
+      "Long-lived OSS credentials stay server side. A mobile client never receives the OSS credential material and never uploads with a long-lived key.",
+      "The mobile client uploads with a server-side signed, short-lived upload ticket and confirms the asset afterwards, so the server remains the only issuer of object access.",
+      "The object key is generated and owned by the server. A client-supplied file name or path is never used as the stored object key.",
+      "app.FileAsset is the single asset record per object: the unique constraint on the tenant and the object key means one object key exists once per tenant, and the bucket column is optional so the configured shared bucket is the default.",
+      "An existing key name is never renamed or overwritten. Rotating the shared credential is a server-side deployment action for a later task, not part of this report.",
+      "The executor reports this contract; it does not edit queue state, approvals, controller code, the task blueprint or any OSS object."
+    ]
+  },
+  "declared_contract": {
+    "ddl": {
+      "available": true,
+      "path": "docs/NEWAPP_Database_DDL_V1.sql",
+      "line_count": 476,
+      "asset_table": "app.FileAsset",
+      "table_definition_start_line": 104,
+      "table_definition_end_line": 129,
+      "columns": [
+        {
+          "name": "Purpose",
+          "data_type": "NVARCHAR",
+          "length": "32",
+          "nullability": "NOT NULL",
+          "line": 109
+        },
+        {
+          "name": "ObjectKey",
+          "data_type": "NVARCHAR",
+          "length": "600",
+          "nullability": "NOT NULL",
+          "line": 110
+        },
+        {
+          "name": "Bucket",
+          "data_type": "NVARCHAR",
+          "length": "160",
+          "nullability": "NULL",
+          "line": 111
+        },
+        {
+          "name": "UploadStatus",
+          "data_type": "TINYINT",
+          "length": null,
+          "nullability": "NOT NULL",
+          "line": 119
+        }
+      ],
+      "unique_constraints": [
+        {
+          "name": "UQ_app_FileAsset_Object",
+          "table": "app.FileAsset",
+          "columns": [
+            "TenantId",
+            "ObjectKey"
+          ],
+          "line": 125
+        }
+      ],
+      "referencing_foreign_keys": [
+        {
+          "name": "FK_app_CustomerExt_Photo",
+          "table": "app.CustomerExt",
+          "columns": [
+            "PhotoAssetId"
+          ],
+          "references": "app.FileAsset",
+          "target_columns": [
+            "AssetId"
+          ],
+          "line": 146
+        },
+        {
+          "name": "FK_app_SupplierExt_Card",
+          "table": "app.SupplierExt",
+          "columns": [
+            "BusinessCardAssetId"
+          ],
+          "references": "app.FileAsset",
+          "target_columns": [
+            "AssetId"
+          ],
+          "line": 165
+        },
+        {
+          "name": "FK_app_InquiryItemImage_Asset",
+          "table": "app.InquiryItemImage",
+          "columns": [
+            "AssetId"
+          ],
+          "references": "app.FileAsset",
+          "target_columns": [
+            "AssetId"
+          ],
+          "line": 277
+        },
+        {
+          "name": "FK_app_AIJob_Asset",
+          "table": "app.AIJob",
+          "columns": [
+            "AssetId"
+          ],
+          "references": "app.FileAsset",
+          "target_columns": [
+            "AssetId"
+          ],
+          "line": 342
+        },
+        {
+          "name": "FK_app_ExportJob_Asset",
+          "table": "app.ExportJob",
+          "columns": [
+            "ResultAssetId"
+          ],
+          "references": "app.FileAsset",
+          "target_columns": [
+            "AssetId"
+          ],
+          "line": 383
+        }
+      ],
+      "upload_status_tokens": [
+        "pending",
+        "ready",
+        "failed",
+        "deleted"
+      ],
+      "table_count": 20,
+      "ddl_executed": false,
+      "ddl_apply_requires_human_gate": true,
+      "values_recorded": false
+    },
+    "openapi": {
+      "available": true,
+      "path": "docs/NEWAPP_OpenAPI_V1.yaml",
+      "line_count": 1012,
+      "file_paths": [
+        {
+          "path": "/files/upload-ticket",
+          "line": 434
+        },
+        {
+          "path": "/files/{assetId}/complete",
+          "line": 454
+        }
+      ],
+      "upload_ticket_path": {
+        "path": "/files/upload-ticket",
+        "line": 434,
+        "request_required_fields": [
+          "purpose",
+          "fileName",
+          "contentType",
+          "sha256"
+        ]
+      },
+      "asset_purpose_tokens": [
+        "product",
+        "customer_photo",
+        "business_card",
+        "export_attachment",
+        "diagnostic_log"
+      ],
+      "asset_purpose_line": 447,
+      "ticket_schema": {
+        "name": "UploadTicket",
+        "line": 938,
+        "required_fields": [
+          "assetId",
+          "uploadUrl",
+          "expiresAt"
+        ],
+        "property_names": [
+          "assetId",
+          "uploadUrl",
+          "method",
+          "headers",
+          "objectKey",
+          "expiresAt"
+        ],
+        "credential_fields": [],
+        "credential_field_count": 0
+      },
+      "declared_download_paths": [],
+      "declared_download_path_count": 0,
+      "requests_sent": false,
+      "values_recorded": false
+    }
+  },
+  "repository_search": {
+    "scope": {
+      "include_suffixes": [
+        ".md",
+        ".yaml",
+        ".yml",
+        ".json",
+        ".sql",
+        ".py",
+        ".cs",
+        ".ts",
+        ".dart",
+        ".txt"
+      ],
+      "excluded_prefixes": [
+        ".git/",
+        ".venv/",
+        ".ai/logs/",
+        ".ai/evidence/",
+        ".ai/brain/",
+        ".ai/decisions/",
+        ".ai/locks/",
+        ".ai/controller/",
+        "__pycache__/",
+        "node_modules/",
+        "bin/",
+        "obj/"
+      ],
+      "excluded_self_paths": [
+        ".ai/generated/NEWAPP-004-oss-contract.json",
+        "docs/SHARED_OSS_CONTRACT.md"
+      ],
+      "max_bytes": 2000000,
+      "paths": [
+        ".ai/agent_config.yaml",
+        ".ai/BRAIN_RULES.md",
+        ".ai/EXECUTOR_RULES.md",
+        ".ai/generated/NEWAPP-001-baseline-report.json",
+        ".ai/generated/NEWAPP-002-env-contract.json",
+        ".ai/generated/NEWAPP-003-newerp-schema-map.json",
+        ".ai/generated/NEWAPP-006-status-console.json",
+        ".ai/project_state.json",
+        ".ai/templates/executor_report.json",
+        ".github/workflows/control-plane.yml",
+        "AUTOMATION_README.md",
+        "docs/CONFIGURATION_CONTRACT.md",
+        "docs/CONSOLE_STATUS_CONTRACT.md",
+        "docs/NEWAPP-001-baseline-report.json",
+        "docs/NEWAPP_Database_DDL_V1.sql",
+        "docs/NEWAPP_OpenAPI_V1.yaml",
+        "docs/NEWAPP_TASKS_V1.yaml",
+        "docs/NEWERP_SCHEMA_MAP.md",
+        "docs/README_交付与启动说明.md",
+        "docs/REPOSITORY_BASELINE.md",
+        "requirements-agent.txt",
+        "tests/__init__.py",
+        "tests/baseline/__init__.py",
+        "tests/baseline/repository_baseline.py",
+        "tests/baseline/secret_scan.py",
+        "tests/baseline/test_repository_baseline.py",
+        "tests/baseline/test_secret_scan.py",
+        "tests/config/__init__.py",
+        "tests/config/env_contract.py",
+        "tests/config/test_env_contract.py",
+        "tests/console/__init__.py",
+        "tests/console/status_snapshot.py",
+        "tests/console/test_status_console.py",
+        "tests/oss/__init__.py",
+        "tests/oss/oss_contract.py",
+        "tests/oss/test_oss_contract.py",
+        "tests/schema/__init__.py",
+        "tests/schema/newerp_schema.py",
+        "tests/schema/test_newerp_schema.py"
+      ],
+      "path_count": 39,
+      "excluded": [
+        {
+          "path": ".ai/generated/NEWAPP-004-oss-contract.json",
+          "reason": "artifact owned by this task"
+        },
+        {
+          "path": "docs/SHARED_OSS_CONTRACT.md",
+          "reason": "artifact owned by this task"
+        }
+      ]
+    },
+    "patterns": [
+      {
+        "id": "object_key_field",
+        "description": "declared object-key column or field",
+        "match_count": 26,
+        "file_count": 6,
+        "files": [
+          {
+            "path": ".ai/generated/NEWAPP-003-newerp-schema-map.json",
+            "line_numbers": [
+              10927,
+              10948,
+              10989
+            ],
+            "match_count": 3
+          },
+          {
+            "path": "docs/NEWAPP_Database_DDL_V1.sql",
+            "line_numbers": [
+              110,
+              125
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "docs/NEWAPP_OpenAPI_V1.yaml",
+            "line_numbers": [
+              946
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/NEWERP_SCHEMA_MAP.md",
+            "line_numbers": [
+              915
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              124
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              157,
+              160,
+              201,
+              208,
+              209,
+              462,
+              464,
+              465,
+              470,
+              507,
+              541,
+              544,
+              548,
+              580,
+              606,
+              797,
+              844,
+              853
+            ],
+            "match_count": 18
+          }
+        ]
+      },
+      {
+        "id": "bucket_field",
+        "description": "declared bucket column or field",
+        "match_count": 91,
+        "file_count": 11,
+        "files": [
+          {
+            "path": ".ai/generated/NEWAPP-002-env-contract.json",
+            "line_numbers": [
+              131,
+              232,
+              316,
+              335,
+              344,
+              356,
+              365
+            ],
+            "match_count": 7
+          },
+          {
+            "path": "docs/CONFIGURATION_CONTRACT.md",
+            "line_numbers": [
+              86,
+              87,
+              97
+            ],
+            "match_count": 3
+          },
+          {
+            "path": "docs/NEWAPP_Database_DDL_V1.sql",
+            "line_numbers": [
+              111
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/NEWAPP_TASKS_V1.yaml",
+            "line_numbers": [
+              121,
+              124
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "tests/baseline/test_secret_scan.py",
+            "line_numbers": [
+              103
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/config/env_contract.py",
+            "line_numbers": [
+              95,
+              125,
+              133,
+              144,
+              152,
+              165
+            ],
+            "match_count": 6
+          },
+          {
+            "path": "tests/config/test_env_contract.py",
+            "line_numbers": [
+              110
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              16,
+              25,
+              44,
+              45,
+              124,
+              157,
+              168,
+              169,
+              171,
+              179,
+              180,
+              191,
+              202,
+              214,
+              215,
+              218,
+              298,
+              313,
+              339,
+              340,
+              371,
+              386,
+              402,
+              784,
+              788,
+              808,
+              926,
+              962,
+              974,
+              1044,
+              1046,
+              1058,
+              1063,
+              1065,
+              1066,
+              1125,
+              1127,
+              1132,
+              1167,
+              1219,
+              1220,
+              1222,
+              1226,
+              1227,
+              1228,
+              1231,
+              1232,
+              1235,
+              1237,
+              1361,
+              1409,
+              1625,
+              1631,
+              1633,
+              1634,
+              1635
+            ],
+            "match_count": 56
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              108,
+              112,
+              158,
+              363,
+              364,
+              462,
+              466,
+              797,
+              844,
+              845
+            ],
+            "match_count": 10
+          },
+          {
+            "path": "tests/schema/newerp_schema.py",
+            "line_numbers": [
+              1201,
+              1202,
+              1203
+            ],
+            "match_count": 3
+          },
+          {
+            "path": "tests/schema/test_newerp_schema.py",
+            "line_numbers": [
+              123
+            ],
+            "match_count": 1
+          }
+        ]
+      },
+      {
+        "id": "purpose_field",
+        "description": "declared asset purpose or classification field",
+        "match_count": 26,
+        "file_count": 4,
+        "files": [
+          {
+            "path": "docs/NEWAPP_Database_DDL_V1.sql",
+            "line_numbers": [
+              4,
+              109,
+              128
+            ],
+            "match_count": 3
+          },
+          {
+            "path": "docs/NEWAPP_OpenAPI_V1.yaml",
+            "line_numbers": [
+              57,
+              60,
+              445,
+              447
+            ],
+            "match_count": 4
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              124,
+              158,
+              201,
+              591,
+              720,
+              721,
+              723,
+              798,
+              800,
+              806,
+              1346,
+              1347
+            ],
+            "match_count": 12
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              156,
+              187,
+              189,
+              462,
+              499,
+              606,
+              844
+            ],
+            "match_count": 7
+          }
+        ]
+      },
+      {
+        "id": "tenant_scope_field",
+        "description": "tenant scoping used on asset rows",
+        "match_count": 60,
+        "file_count": 9,
+        "files": [
+          {
+            "path": ".ai/generated/NEWAPP-003-newerp-schema-map.json",
+            "line_numbers": [
+              10935,
+              10956,
+              11021,
+              11245
+            ],
+            "match_count": 4
+          },
+          {
+            "path": "docs/NEWAPP_Database_DDL_V1.sql",
+            "line_numbers": [
+              25,
+              50,
+              61,
+              69,
+              77,
+              80,
+              88,
+              97,
+              108,
+              125,
+              128,
+              136,
+              145,
+              155,
+              164,
+              168,
+              177,
+              192,
+              193,
+              194,
+              202,
+              220,
+              222,
+              230,
+              289,
+              301,
+              325,
+              346,
+              354,
+              372,
+              386,
+              395,
+              404,
+              411,
+              419,
+              429,
+              438,
+              447,
+              462,
+              471
+            ],
+            "match_count": 40
+          },
+          {
+            "path": "docs/NEWAPP_OpenAPI_V1.yaml",
+            "line_numbers": [
+              778,
+              782
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "docs/NEWAPP_TASKS_V1.yaml",
+            "line_numbers": [
+              131
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/NEWERP_SCHEMA_MAP.md",
+            "line_numbers": [
+              923,
+              977
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              798
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              155,
+              160,
+              470,
+              606,
+              620
+            ],
+            "match_count": 5
+          },
+          {
+            "path": "tests/schema/newerp_schema.py",
+            "line_numbers": [
+              2002
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/schema/test_newerp_schema.py",
+            "line_numbers": [
+              127,
+              128,
+              784,
+              808
+            ],
+            "match_count": 4
+          }
+        ]
+      },
+      {
+        "id": "upload_ticket_boundary",
+        "description": "short-lived signed upload boundary",
+        "match_count": 23,
+        "file_count": 3,
+        "files": [
+          {
+            "path": "docs/NEWAPP_OpenAPI_V1.yaml",
+            "line_numbers": [
+              434,
+              438,
+              453,
+              938
+            ],
+            "match_count": 4
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              160,
+              589,
+              712,
+              718,
+              753,
+              760,
+              761,
+              768,
+              1335
+            ],
+            "match_count": 9
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              178,
+              180,
+              195,
+              496,
+              497,
+              500,
+              504,
+              577,
+              580,
+              851
+            ],
+            "match_count": 10
+          }
+        ]
+      },
+      {
+        "id": "credential_name",
+        "description": "long-lived credential key names",
+        "match_count": 51,
+        "file_count": 12,
+        "files": [
+          {
+            "path": ".ai/agent_config.yaml",
+            "line_numbers": [
+              143,
+              144,
+              156
+            ],
+            "match_count": 3
+          },
+          {
+            "path": ".ai/generated/NEWAPP-002-env-contract.json",
+            "line_numbers": [
+              55,
+              56,
+              94,
+              110,
+              171,
+              172,
+              279,
+              280,
+              286,
+              287,
+              351,
+              360
+            ],
+            "match_count": 12
+          },
+          {
+            "path": ".ai/generated/NEWAPP-006-status-console.json",
+            "line_numbers": [
+              533
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/CONFIGURATION_CONTRACT.md",
+            "line_numbers": [
+              52,
+              53,
+              62,
+              76,
+              88,
+              89
+            ],
+            "match_count": 6
+          },
+          {
+            "path": "docs/NEWAPP_TASKS_V1.yaml",
+            "line_numbers": [
+              17,
+              170
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "docs/README_交付与启动说明.md",
+            "line_numbers": [
+              10
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/baseline/secret_scan.py",
+            "line_numbers": [
+              44
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "tests/baseline/test_secret_scan.py",
+            "line_numbers": [
+              33,
+              55,
+              124,
+              128
+            ],
+            "match_count": 4
+          },
+          {
+            "path": "tests/config/env_contract.py",
+            "line_numbers": [
+              139,
+              147
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "tests/config/test_env_contract.py",
+            "line_numbers": [
+              134,
+              135,
+              150,
+              151,
+              215,
+              216,
+              273,
+              274,
+              424,
+              425
+            ],
+            "match_count": 10
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              98,
+              99,
+              165
+            ],
+            "match_count": 3
+          },
+          {
+            "path": "tests/oss/test_oss_contract.py",
+            "line_numbers": [
+              135,
+              136,
+              206,
+              431,
+              437,
+              438
+            ],
+            "match_count": 6
+          }
+        ]
+      },
+      {
+        "id": "key_prefix_token",
+        "description": "explicit object-key prefix token",
+        "match_count": 7,
+        "file_count": 5,
+        "files": [
+          {
+            "path": ".ai/generated/NEWAPP-002-env-contract.json",
+            "line_numbers": [
+              475
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/CONFIGURATION_CONTRACT.md",
+            "line_numbers": [
+              156
+            ],
+            "match_count": 1
+          },
+          {
+            "path": "docs/NEWAPP_TASKS_V1.yaml",
+            "line_numbers": [
+              121,
+              124
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "tests/config/env_contract.py",
+            "line_numbers": [
+              37,
+              175
+            ],
+            "match_count": 2
+          },
+          {
+            "path": "tests/oss/oss_contract.py",
+            "line_numbers": [
+              1044
+            ],
+            "match_count": 1
+          }
+        ]
+      }
+    ],
+    "match_count": 284,
+    "matched_path_count": 50,
+    "matched_text_recorded": false,
+    "previous_task_artifacts": [
+      ".ai/generated/NEWAPP-002-env-contract.json",
+      "docs/CONFIGURATION_CONTRACT.md"
+    ],
+    "reference_tree": {
+      "mode": "not_provided",
+      "reason": "no read-only reference tree was supplied, so an external object-key convention stays unresolved in this report",
+      "paths_searched": 0,
+      "patterns": [],
+      "match_count": 0,
+      "matched_text_recorded": false,
+      "files_written_to_reference_tree": false
+    }
+  },
+  "recorded_rules": [
+    "NEWAPP and NEWERP share one OSS bucket and one object namespace. NEWAPP never creates a second bucket, a NEWAPP-only bucket or a parallel object store.",
+    "No NEWAPP/NEWERP object synchronisation service exists. Both applications read and write the shared bucket through this contract, and shared asset metadata lives in the shared database.",
+    "Long-lived OSS credentials stay server side. A mobile client never receives the OSS credential material and never uploads with a long-lived key.",
+    "The mobile client uploads with a server-side signed, short-lived upload ticket and confirms the asset afterwards, so the server remains the only issuer of object access.",
+    "The object key is generated and owned by the server. A client-supplied file name or path is never used as the stored object key.",
+    "app.FileAsset is the single asset record per object: the unique constraint on the tenant and the object key means one object key exists once per tenant, and the bucket column is optional so the configured shared bucket is the default.",
+    "An existing key name is never renamed or overwritten. Rotating the shared credential is a server-side deployment action for a later task, not part of this report.",
+    "The executor reports this contract; it does not edit queue state, approvals, controller code, the task blueprint or any OSS object."
+  ],
+  "client_boundary_rules": [
+    "A mobile client calls the HTTPS API only. It never connects to SQL Server and never receives a database connection string.",
+    "A mobile client never receives the OSS credential key or material, and never receives a ticket for another tenant or any listing permission on the shared bucket.",
+    "Asset references travel between client and server as asset identifiers, so the client never needs the object key to read an asset back.",
+    "Diagnostic evidence, logs and screenshots never include credential material from the environment file."
+  ],
+  "proposed_key_strategy": {
+    "status": "proposed_for_gpt_review_not_established_by_this_task",
+    "pattern_label": "<purpose>/<tenantId>/<opaque-id>[.<extension>]",
+    "segments": [
+      "the declared asset purpose token as the leading classification segment",
+      "the tenant scope",
+      "an opaque server-generated identifier",
+      "an optional extension token derived from the declared content type"
+    ],
+    "derived_from": [
+      "the declared asset purpose field of the shared asset table",
+      "the tenant-scoped uniqueness of the object key",
+      "the optional bucket column, so the configured shared bucket is the default",
+      "the server-owned short-lived upload ticket"
+    ],
+    "rules": [
+      "the server builds the key; a client-supplied file name is never used as the key",
+      "the key stays stable after upload, so an existing object is never moved or rewritten",
+      "the key is unique per tenant, matching the declared unique constraint",
+      "no NEWERP-written object is renamed, moved or deleted by NEWAPP"
+    ],
+    "confirmations_needed": [
+      "GPT accepts this candidate layout, or replaces it with the actual NEWERP convention",
+      "NEWAPP-010 implements the ticket issuer against the accepted layout",
+      "a read-only inspection of an existing object namespace confirms the leading segment"
+    ],
+    "displayed_as_a_recorded_convention": false,
+    "notes": [
+      "This task records the declared contract. It does not establish a new key layout and it does not change any existing object key.",
+      "The candidate layout below is derived only from declared facts of this checkout: the asset purpose field, the tenant-scoped uniqueness of the object key, the optional bucket column and the server-owned upload ticket.",
+      "The layout becomes normative only after GPT accepts it and NEWAPP-010 implements the ticket issuer against it. Until then NEWAPP must not rewrite, move or relocate an object written by NEWERP.",
+      "The key convention of existing NEWERP objects is not discoverable from this checkout. If a later read-only inspection provides it, that evidence replaces this candidate layout."
+    ]
+  },
+  "documentation_statements": {
+    "status": "passed",
+    "statements_checked": 11,
+    "missing": [],
+    "statement_text_recorded": false
+  },
+  "external_calls": {
+    "oss_calls": 0,
+    "database_connections": 0,
+    "network_requests": 0,
+    "note": "This task inspects this checkout only; no OSS, database or network call is made by this module or by its tests."
+  },
+  "limitations": [
+    "The provider family is inferred from the endpoint host suffix list documented in this module, so a custom domain, a masked value or an unlisted provider is reported as unrecognised rather than guessed.",
+    "The endpoint text, the bucket name and the credential material are never recorded, so this report cannot verify which physical bucket is bound at runtime or whether it is the bucket NEWERP uses.",
+    "The object-key convention of existing NEWERP objects is not discoverable from this checkout, so the candidate key layout stays a proposal for GPT rather than a recorded convention.",
+    "No OSS API call is made, so bucket policy, region, lifecycle rules and object counts stay unverified.",
+    "The environment file is read on a single local checkout, so another developer machine may declare additional or missing names.",
+    "agent.env, secrets, signing files and cloud credential files are never opened by this module."
+  ],
+  "artifacts": {
+    "report_paths": [
+      ".ai/generated/NEWAPP-004-oss-contract.json"
+    ],
+    "doc_paths": [
+      "docs/SHARED_OSS_CONTRACT.md"
+    ],
+    "executor_paths": [
+      ".ai/generated/NEWAPP-004-oss-contract.json",
+      "docs/SHARED_OSS_CONTRACT.md",
+      "tests/oss/__init__.py",
+      "tests/oss/oss_contract.py",
+      "tests/oss/test_oss_contract.py"
+    ],
+    "allowed_path_patterns_source": ".ai/agent_config.yaml#paths.executor_allowed",
+    "allowed_path_patterns": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "database/**",
+      ".github/**",
+      ".ai/generated/**",
+      "*.sln",
+      "*.md",
+      ".gitignore"
+    ],
+    "protected_pattern_count": 19
+  },
+  "path_guard": {
+    "allowed_patterns_source": ".ai/agent_config.yaml#paths.executor_allowed",
+    "allowed_patterns": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "database/**",
+      ".github/**",
+      ".ai/generated/**",
+      "*.sln",
+      "*.md",
+      ".gitignore"
+    ],
+    "normalization": "common.path_matches applies path.replace('\\\\','/') and removes only exact leading './' prefixes before fnmatch, so dot-directory patterns are preserved",
+    "paths": [
+      {
+        "path": ".ai/generated/NEWAPP-004-oss-contract.json",
+        "normalized_for_guard": ".ai/generated/newapp-004-oss-contract.json",
+        "accepted": true,
+        "matched_patterns": [
+          ".ai/generated/**"
+        ]
+      },
+      {
+        "path": "docs/SHARED_OSS_CONTRACT.md",
+        "normalized_for_guard": "docs/shared_oss_contract.md",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**",
+          "*.md"
+        ]
+      },
+      {
+        "path": "tests/oss/__init__.py",
+        "normalized_for_guard": "tests/oss/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/oss/oss_contract.py",
+        "normalized_for_guard": "tests/oss/oss_contract.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/oss/test_oss_contract.py",
+        "normalized_for_guard": "tests/oss/test_oss_contract.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      }
+    ],
+    "all_paths_accepted": true,
+    "protected_paths_touched": [],
+    "no_protected_path_touched": true
+  },
+  "acceptance_evidence": [
+    {
+      "criterion": "The declared OSS configuration and the declared asset/ticket contract were readable.",
+      "evidence": "every controller-required OSS name is present and non-empty in the environment file, and the declared app-schema DDL and API contract were found and parsed read-only",
+      "satisfied": true
+    },
+    {
+      "criterion": "Shared bucket/key-prefix strategy is documented.",
+      "evidence": "the recorded shared-OSS rules, the shared bucket policy, the candidate key strategy marked as a proposal for GPT, and the declared asset-table and ticket facts with file and line numbers",
+      "satisfied": true
+    },
+    {
+      "criterion": "No secret is printed.",
+      "evidence": "the reused value guard over both rendered artifacts (no assignment character, no declared key name followed by an assignment delimiter, every recorded name matching the key-name character set), the repository scanner content rules, and the explicit false flags for the endpoint text, the bucket name and the credential material",
+      "satisfied": true
+    },
+    {
+      "criterion": "One shared bucket is reused and no second bucket or synchronisation layer appears.",
+      "evidence": "the recorded rules state one shared bucket and no synchronisation service, the configured bucket count is one, and no bucket creation or object copy is performed by this task",
+      "satisfied": true
+    },
+    {
+      "criterion": "No OSS object is uploaded, listed, copied or deleted by this task.",
+      "evidence": "the environment file is opened read-only and its write timestamp is unchanged across the run, and no OSS client, connection or request exists in this module or its tests",
+      "satisfied": true
+    },
+    {
+      "criterion": "Generated artifacts stay inside the executor allowed paths.",
+      "evidence": "the reused controller path-guard mirror over every executor path recorded by this report, plus the protected pattern list read from the controller configuration",
+      "satisfied": true
+    }
+  ],
+  "status": "evidence_collected",
+  "artifact_checks_verified": true,
+  "report_value_guard": {
+    "artifact": ".ai/generated/NEWAPP-004-oss-contract.json",
+    "status": "passed",
+    "checks": [
+      "no declared key name is followed by an assignment delimiter",
+      "the rendered text contains no assignment character",
+      "every recorded key name matches the environment key-name character set"
+    ],
+    "declared_key_count": 6,
+    "delimiter_after_name_line_numbers": [],
+    "non_name_character_key_names": [],
+    "equal_sign_count": 0,
+    "values_recorded": false
+  },
+  "documentation_value_guard": {
+    "artifact": "docs/SHARED_OSS_CONTRACT.md",
+    "status": "passed",
+    "checks": [
+      "no declared key name is followed by an assignment delimiter",
+      "the rendered text contains no assignment character",
+      "every recorded key name matches the environment key-name character set"
+    ],
+    "declared_key_count": 6,
+    "delimiter_after_name_line_numbers": [],
+    "non_name_character_key_names": [],
+    "equal_sign_count": 0,
+    "values_recorded": false
+  },
+  "scanner_self_check": {
+    "available": true,
+    "scanner": "tests/baseline/secret_scan.py",
+    "scope": "content rules of the repository scanner applied to the generated artifacts",
+    "checked_paths": [
+      ".ai/generated/NEWAPP-004-oss-contract.json",
+      "docs/SHARED_OSS_CONTRACT.md"
+    ],
+    "findings": [],
+    "findings_count": 0,
+    "values_recorded": false,
+    "status": "passed"
+  },
+  "artifact_check_passes": 2
+}
