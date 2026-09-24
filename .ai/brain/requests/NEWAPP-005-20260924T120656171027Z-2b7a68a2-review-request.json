@@ -34,5 +34,9 @@
     "criteria_results": [],
     "required_fixes": []
   },
-  "record_command": "start_agent.bat record-review NEWAPP-005 20260924T120656171027Z-2b7a68a2 --decision accept --rationale <text>"
+  "record_command": "start_agent.bat record-review NEWAPP-005 20260924T120656171027Z-2b7a68a2 --decision accept --rationale <text>",
+  "github_pr": null,
+  "github_branch": "agent/newapp-005-2b7a68a2",
+  "github_review_url": null,
+  "github_relay_mode": "local_only"
 }
