@@ -29,3 +29,4 @@
 {"at": "2026-09-24T11:48:10.350939Z", "event": "rolling_pipeline_recovered", "cleared_blockers": ["NEWAPP-003 stale branch state", "NEWAPP-004 workspace-wide branch error"], "runnable_tasks": ["NEWAPP-004", "NEWAPP-005"], "remote_push": "not_authorized"}
 {"at": "2026-09-24T11:56:32.186077Z", "event": "cline_runtime_recovered", "version": "3.0.65", "affected_tasks": ["NEWAPP-004", "NEWAPP-005"], "action": "requeued_after_incomplete_global_install_repaired"}
 {"at": "2026-09-24T12:06:55.940872Z", "event": "candidate_published_for_hourly_review", "task_id": "NEWAPP-004", "run_id": "20260924T115700697938Z-c477b696", "branch": "agent/newapp-004-c477b696"}
+{"at": "2026-09-24T12:18:24.368455Z", "event": "candidate_published_for_hourly_review", "task_id": "NEWAPP-005", "run_id": "20260924T120656171027Z-2b7a68a2", "branch": "agent/newapp-005-2b7a68a2"}
