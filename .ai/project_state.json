@@ -61,6 +61,26 @@
         "source": "hourly_gpt_control_plane_review",
         "recorded_at": "2026-09-23T12:57:30Z"
       }
+    },
+    "NEWAPP-003": {
+      "status": "queued",
+      "updated_at": "2026-09-24T00:17:00Z",
+      "brain_decision": ".ai/brain/decisions/NEWAPP-003-plan.json"
+    },
+    "NEWAPP-004": {
+      "status": "queued",
+      "updated_at": "2026-09-24T00:17:00Z",
+      "brain_decision": ".ai/brain/decisions/NEWAPP-004-plan.json"
+    },
+    "NEWAPP-005": {
+      "status": "queued",
+      "updated_at": "2026-09-24T00:17:00Z",
+      "brain_decision": ".ai/brain/decisions/NEWAPP-005-plan.json"
+    },
+    "NEWAPP-006": {
+      "status": "queued",
+      "updated_at": "2026-09-24T00:17:00Z",
+      "brain_decision": ".ai/brain/decisions/NEWAPP-006-plan.json"
     }
   },
   "last_validation": {
@@ -68,9 +88,37 @@
     "exit_code": 0,
     "profile": "safe",
     "steps": [
-      {"command": ["python", "-m", "compileall", "-q", ".ai/controller"], "exit_code": 0},
-      {"command": ["python", "-m", "unittest", "discover", "-s", "tests/config", "-p", "test_*.py"], "exit_code": 0},
-      {"command": ["python", "tests/baseline/secret_scan.py", "--json"], "exit_code": 0}
+      {
+        "command": [
+          "python",
+          "-m",
+          "compileall",
+          "-q",
+          ".ai/controller"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/config",
+          "-p",
+          "test_*.py"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python",
+          "tests/baseline/secret_scan.py",
+          "--json"
+        ],
+        "exit_code": 0
+      }
     ],
     "log": ".ai/logs/20260923T121241818265Z-4a51acee-validation.log"
   },
@@ -84,5 +132,6 @@
     "source": "hourly_gpt_control_plane_review",
     "recorded_at": "2026-09-23T12:57:30Z"
   },
-  "updated_at": "2026-09-23T12:59:00Z"
+  "updated_at": "2026-09-24T00:17:00Z",
+  "next_action": "Execute GPT-approved NEWAPP-003, NEWAPP-004 and NEWAPP-006 in dependency-safe order; NEWAPP-005 becomes runnable after NEWAPP-003 completes. Keep GPT as sole planner/reviewer and Cline/DeepSeek executor-only."
 }
