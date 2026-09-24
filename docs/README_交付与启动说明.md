@@ -15,6 +15,7 @@
 - `NEWAPP_UI页面原型与交互说明_V1.0.docx`：30 个页面与关键交互。
 - `NEWAPP_OpenAPI_V1.yaml`：移动端/API 合同初稿。
 - `NEWAPP_Database_DDL_V1.sql`：仅新增 app schema 与移动专属/扩展表；执行前必须先完成实际 NEWERP Schema Mapping。
+- `NEWERP_SCHEMA_MAP.md`：NEWAPP-003 只读读取共享库元数据后生成的真实表、主键、索引与 rowversion 映射（含显式未确认项），由 `tests/schema/newerp_schema.py --write` 重新生成。
 - `NEWAPP_TASKS_V1.yaml`：68 个自动开发任务，GPT 负责规划/验收，执行模型逐项实施。
 
 ## 第一批执行顺序
