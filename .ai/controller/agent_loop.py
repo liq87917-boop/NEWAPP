@@ -249,14 +249,20 @@ def run_one(*, plan_only: bool = False) -> int:
             audit("validation_exception", task_id=task["id"], run_id=run_id, error=str(exc))
             print(f"Validation/evidence failed: {exc}", file=sys.stderr)
             return 21
-        if manifest["status"] != "ready_for_gpt_review":
-            set_task_status(project_state, task["id"], "failed", evidence_status=manifest["status"])
-            save_state(project_state, phase="failed", blocker="Validation/evidence/path guard did not pass", last_validation=validation)
-            audit("evidence_insufficient", task_id=task["id"], run_id=run_id)
-            return 21
+        evidence_ready = manifest["status"] == "ready_for_gpt_review"
+        if not evidence_ready:
+            # Do not kill unattended rolling development before GPT can inspect the
+            # candidate. Publish the branch + manifest and let the sole GPT reviewer
+            # reject/retry it while unrelated dependency-safe tasks keep moving.
+            audit(
+                "evidence_insufficient_for_review",
+                task_id=task["id"],
+                run_id=run_id,
+                evidence_status=manifest["status"],
+            )
         review_request = request_review(task, run_id, manifest["manifest_path"])
         relative_request = str(review_request.relative_to(ROOT)).replace("\\", "/")
-        set_task_status(project_state, task["id"], "awaiting_review", run_id=run_id, evidence_manifest=manifest["manifest_path"], changed_paths=manifest["path_guard"]["changed_paths"], review_request=relative_request)
+        set_task_status(project_state, task["id"], "awaiting_review", run_id=run_id, evidence_manifest=manifest["manifest_path"], evidence_status=manifest["status"], changed_paths=manifest["path_guard"]["changed_paths"], review_request=relative_request)
         save_state(project_state, phase="awaiting_codex_gpt_review", last_validation=validation, blocker="Codex desktop/mobile GPT final review required")
         audit("desktop_brain_review_requested", task_id=task["id"], run_id=run_id, request=relative_request)
         try:
@@ -283,6 +289,7 @@ def run_one(*, plan_only: bool = False) -> int:
                 branch=branch,
                 attempts=previous_attempts + 1,
                 evidence_manifest=manifest["manifest_path"],
+                evidence_status=manifest["status"],
                 changed_paths=manifest["path_guard"]["changed_paths"],
                 review_request=relative_request,
                 github_pr=relay.get("pr_url"),
@@ -310,6 +317,8 @@ def run_one(*, plan_only: bool = False) -> int:
             "github_review_url": relay.get("review_url"),
             "github_pr": relay.get("pr_url"),
             "github_relay_mode": relay.get("relay_mode", "git_branch"),
+            "evidence_status": manifest["status"],
+            "evidence_ready": evidence_ready,
         }, ensure_ascii=False, indent=2))
         return 17
 
