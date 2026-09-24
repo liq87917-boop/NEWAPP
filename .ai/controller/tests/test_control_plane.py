@@ -13,6 +13,8 @@ from task_loader import QueueResult, load_tasks, queue_head, requires_human_gate
 from common import config, path_matches
 from agent_loop import preflight
 from cline_executor import console_message
+from browser_acceptance import evaluate as browser_acceptance
+from evidence import screenshot_requirement
 
 
 class ControlPlaneContractTests(unittest.TestCase):
@@ -78,6 +80,22 @@ class ControlPlaneContractTests(unittest.TestCase):
         flattened = [" ".join(command) for command in commands]
         self.assertTrue(any("unittest discover -s tests/config" in command for command in flattened))
         self.assertTrue(any("tests/baseline/secret_scan.py --json" in command for command in flattened))
+
+    def test_newapp_003_has_focused_validation_commands(self) -> None:
+        commands = config()["validation"]["task_commands"]["NEWAPP-003"]
+        flattened = [" ".join(command) for command in commands]
+        self.assertTrue(any("unittest discover -s tests/schema" in command for command in flattened))
+        self.assertTrue(any("tests/baseline/secret_scan.py --json" in command for command in flattened))
+
+    def test_missing_real_browser_command_is_temporarily_nonblocking(self) -> None:
+        self.assertFalse(config()["browser_acceptance"]["blocking"])
+        result = browser_acceptance({"id": "TEST", "title": "UI screen"}, "test-run")
+        self.assertEqual("deferred_nonblocking", result["status"])
+        self.assertFalse(result["blocking"])
+
+    def test_inquiry_text_does_not_trigger_ui_screenshot_gate(self) -> None:
+        task = {"id": "TEST", "title": "Inspect inquiry schema"}
+        self.assertFalse(screenshot_requirement(task))
 
     def test_cline_console_suppresses_reasoning_event_noise(self) -> None:
         line = '{"ts":"2026-09-23T12:08:06.121Z","type":"agent_event","event":{"type":"content_start","contentType":"reasoning","reasoning":"status","redacted":false}}'

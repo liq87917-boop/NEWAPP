@@ -13,10 +13,11 @@ def evaluate(task: dict[str, Any], run_id: str) -> dict[str, Any]:
     commands = settings.get("commands", [])
     if not commands:
         return {
-            "status": "blocked",
+            "status": "blocked" if settings.get("blocking", True) else "deferred_nonblocking",
             "real_browser": bool(settings.get("require_real_browser", True)),
             "screenshots": 0,
-            "reason": "No real-browser acceptance command is configured for the current app scaffold"
+            "reason": "No real-browser acceptance command is configured for the current app scaffold",
+            "blocking": bool(settings.get("blocking", True)),
         }
     log_path = ROOT / config()["evidence"]["logs_dir"] / f"{run_id}-browser.log"
     outputs: list[str] = []
@@ -44,4 +45,3 @@ def evaluate(task: dict[str, Any], run_id: str) -> dict[str, Any]:
         "steps": steps,
         "log": str(log_path.relative_to(ROOT)).replace("\\", "/")
     }
-

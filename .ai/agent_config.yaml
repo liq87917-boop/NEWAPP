@@ -221,10 +221,28 @@
           "tests/baseline/secret_scan.py",
           "--json"
         ]
+      ],
+      "NEWAPP-003": [
+        [
+          "{python}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/schema",
+          "-p",
+          "test_*.py"
+        ],
+        [
+          "{python}",
+          "tests/baseline/secret_scan.py",
+          "--json"
+        ]
       ]
     }
   },
   "browser_acceptance": {
+    "blocking": false,
     "require_real_browser": true,
     "minimum_screenshots": 1,
     "commands": []

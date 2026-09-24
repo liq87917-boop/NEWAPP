@@ -209,8 +209,19 @@ def run_one(*, plan_only: bool = False) -> int:
         try:
             branch = prepare_task_branch(task["id"], run_id)
         except Exception as exc:
-            set_task_status(project_state, task["id"], "blocked", error=str(exc), run_id=run_id)
-            save_state(project_state, phase="blocked", blocker=str(exc))
+            # A dirty/non-base workspace is a controller-wide recovery issue, not
+            # a failure of the dependency-safe task selected from the queue. Keep
+            # the task runnable and stop this rolling instance before it poisons
+            # every independent task with the same infrastructure error.
+            set_task_status(
+                project_state,
+                task["id"],
+                "retry",
+                error=str(exc),
+                run_id=run_id,
+                retry_reason="controller workspace requires recovery",
+            )
+            save_state(project_state, phase="workspace_recovery_required", blocker=str(exc))
             audit("github_branch_prepare_failed", task_id=task["id"], run_id=run_id, error=str(exc))
             print(f"GitHub relay could not prepare task branch: {exc}", file=sys.stderr)
             return 18
@@ -552,6 +563,14 @@ def main() -> int:
 
             if result == 11:
                 return 11
+
+            if result == 18 and state().get("phase") == "workspace_recovery_required":
+                print(
+                    "[Rolling] Workspace recovery is required; stopping this instance "
+                    "without blocking the selected task.",
+                    file=sys.stderr,
+                )
+                return 18
 
             snapshot = queue_head(load_tasks(), state())
             if snapshot.reason == "queue_empty":
