@@ -57,7 +57,7 @@
       "code_ready",
       "validating"
     ],
-    "fail_closed": true,
+    "fail_closed": false,
     "nonblocking_wait_states": [
       "awaiting_brain",
       "awaiting_human",
@@ -244,5 +244,14 @@
     "review_interval_minutes": 60,
     "allow_unrelated_tasks_while_review_pending": true,
     "dependency_rule": "Only tasks whose declared dependencies are completed may execute; awaiting_review/awaiting_brain/awaiting_human/failed tasks do not globally block unrelated work."
+  },
+  "autonomy": {
+    "enabled": true,
+    "failure_policy": "isolate_and_continue",
+    "human_gate_scope": "dependency_chain_only",
+    "github_failure_mode": "degraded_retry",
+    "keep_controller_alive_on_task_failure": true,
+    "keep_controller_alive_on_refresh_failure": true,
+    "continue_unrelated_dependency_safe_tasks": true
   }
 }

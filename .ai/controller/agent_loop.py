@@ -230,7 +230,8 @@ def run_one(*, plan_only: bool = False) -> int:
             set_task_status(project_state, task["id"], "failed", error=str(exc), run_id=run_id)
             save_state(project_state, phase="failed", blocker=str(exc))
             audit("executor_exception", task_id=task["id"], run_id=run_id, error=str(exc))
-            raise
+            print(f"Executor exception isolated to {task['id']}: {exc}", file=sys.stderr)
+            return 20
         if executor_result["exit_code"] != 0:
             set_task_status(project_state, task["id"], "failed", executor=executor_result)
             save_state(project_state, phase="failed", blocker=f"Cline exited {executor_result['exit_code']}")
@@ -536,30 +537,41 @@ def main() -> int:
     if command == "run":
         rolling = config().get("rolling_queue", {})
         poll_seconds = max(10, int(rolling.get("idle_poll_seconds", 60)))
-        continue_codes = {12, 13, 16, 17}
         print(
             f"Rolling mode active: target={rolling.get('target_size', 4)} "
             f"idle_poll={poll_seconds}s hourly_review={rolling.get('review_interval_minutes', 60)}m",
             flush=True,
         )
         while True:
-            result = run_one()
-            if result in continue_codes:
-                continue
+            try:
+                result = run_one()
+            except Exception as exc:
+                audit("rolling_unhandled_exception", error=str(exc))
+                print(f"[Rolling] Unhandled task exception isolated: {exc}", file=sys.stderr)
+                result = 25
+
+            if result == 11:
+                return 11
+
             snapshot = queue_head(load_tasks(), state())
             if snapshot.reason == "queue_empty":
                 return 0
-            if result == 10 and snapshot.reason.startswith("no_runnable_tasks"):
-                print(f"[Rolling] {snapshot.reason}", flush=True)
-                print(f"[Rolling] Waiting {poll_seconds}s for GPT review / dependency unlock...", flush=True)
-                time.sleep(poll_seconds)
-                try:
-                    refresh_base()
-                except Exception as exc:
-                    print(f"[Rolling] GitHub refresh failed: {exc}", file=sys.stderr)
-                    return 24
+
+            if snapshot.task is not None:
+                if result != 0:
+                    print(f"[Rolling] Isolated result={result}; continuing with {snapshot.task['id']}.", flush=True)
                 continue
-            return result
+
+            print(f"[Rolling] {snapshot.reason}", flush=True)
+            print(f"[Rolling] No dependency-safe task right now; retrying in {poll_seconds}s.", flush=True)
+            time.sleep(poll_seconds)
+            try:
+                refresh_base()
+            except Exception as exc:
+                audit("github_refresh_degraded", error=str(exc))
+                print(f"[Rolling] GitHub refresh degraded: {exc}; local controller remains alive.", file=sys.stderr)
+                time.sleep(poll_seconds)
+            continue
     return 2
 
 

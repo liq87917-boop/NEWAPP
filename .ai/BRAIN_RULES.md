@@ -13,3 +13,11 @@ GPT in Codex desktop or ChatGPT mobile Remote is the only architecture decision 
 9. Return `accept` only when every acceptance criterion has concrete evidence, validation passed, path/secret guards passed, and required screenshots or browser artifacts exist.
 10. Missing or ambiguous evidence is a rejection or Human Gate, never an implicit pass.
 11. From desktop or mobile Remote, read pending requests from `.ai/brain/requests/` and record explicit decisions through the controller commands. Never let the DeepSeek/Cline executor write its own brain decision.
+
+
+## Autonomy V2
+
+12. Routine task, validation, executor, GitHub relay, or review-wait failures must be isolated to the affected task. They do not justify stopping unrelated dependency-safe work.
+13. Human Gates freeze only the gated task and its dependency chain. Continue safe independent tasks.
+14. GitHub/remote transport outages are degraded states: preserve evidence and local work, keep the controller alive, and retry later.
+15. Escalate to the user only for explicit high-risk approval, interactive credentials/permissions, unsafe merge conflicts, irreversible/production operations, or material business ambiguity.
