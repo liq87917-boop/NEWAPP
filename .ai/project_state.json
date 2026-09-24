@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "NEWAPP",
   "controller": "gpt_brain_cline_executor",
-  "phase": "rolling",
+  "phase": "ready",
   "paused": false,
   "pause_reason": null,
   "current_task": null,
@@ -92,7 +92,7 @@
       "publication": "local_only_remote_push_not_authorized"
     },
     "NEWAPP-004": {
-      "status": "awaiting_review",
+      "status": "retry",
       "updated_at": "2026-09-24T12:06:55.934018Z",
       "brain_decision": ".ai/brain/decisions/NEWAPP-004-plan.json",
       "run_id": "20260924T115700697938Z-c477b696",
@@ -111,10 +111,12 @@
       "review_request": ".ai/brain/requests/NEWAPP-004-20260924T115700697938Z-c477b696-review-request.json",
       "github_pr": null,
       "github_review_url": null,
-      "github_relay_mode": "local_only"
+      "github_relay_mode": "local_only",
+      "retry_by": "GPT Supervisor",
+      "retry_reason": "Regenerate evidence with task-specific tests and secret scan"
     },
     "NEWAPP-005": {
-      "status": "awaiting_review",
+      "status": "retry",
       "updated_at": "2026-09-24T12:18:24.362609Z",
       "brain_decision": ".ai/brain/decisions/NEWAPP-005-plan.json",
       "run_id": "20260924T120656171027Z-2b7a68a2",
@@ -133,7 +135,9 @@
       "review_request": ".ai/brain/requests/NEWAPP-005-20260924T120656171027Z-2b7a68a2-review-request.json",
       "github_pr": null,
       "github_review_url": null,
-      "github_relay_mode": "local_only"
+      "github_relay_mode": "local_only",
+      "retry_by": "GPT Supervisor",
+      "retry_reason": "Regenerate evidence with task-specific tests and secret scan"
     },
     "NEWAPP-006": {
       "status": "completed",

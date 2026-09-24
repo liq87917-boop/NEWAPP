@@ -239,6 +239,40 @@
           "tests/baseline/secret_scan.py",
           "--json"
         ]
+      ],
+      "NEWAPP-004": [
+        [
+          "{python}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/oss",
+          "-p",
+          "test_*.py"
+        ],
+        [
+          "{python}",
+          "tests/baseline/secret_scan.py",
+          "--json"
+        ]
+      ],
+      "NEWAPP-005": [
+        [
+          "{python}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/schema",
+          "-p",
+          "test_*.py"
+        ],
+        [
+          "{python}",
+          "tests/baseline/secret_scan.py",
+          "--json"
+        ]
       ]
     }
   },
