@@ -1,0 +1,19 @@
+{
+  "task_id": "NEWAPP-006",
+  "run_id": "20260923T121901530625Z-57fb36d2",
+  "decision": "accept",
+  "rationale": "GPT final review accepted the read-only automated status-console contract. The candidate changed only generated evidence, documentation and console tests; no protected controller/config/state files were included. GitHub Actions validate-controller passed. The generated report records all 16 contract checks passing with no secret-value leaks/content-rule findings. The task acceptance criteria are satisfied; console-specific tests are present but not yet wired into CI, which is a non-blocking follow-up.",
+  "criteria_results": [
+    "Console entry point starts from repository root and delegates to the machine-readable controller.",
+    "Status/preflight contract exposes current task/phase/blockers/last validation and Git readiness without mutating controller state.",
+    "Rolling queue semantics preserve unrelated dependency-safe work while another task awaits review.",
+    "Candidate diff is limited to .ai/generated, docs and tests/console; no protected control-plane file was modified.",
+    "GitHub Actions validate-controller completed successfully for candidate commit 3fd98ff."
+  ],
+  "required_fixes": [],
+  "actor": "Codex GPT Remote",
+  "source": "immediate_gpt_control_plane_review",
+  "reviewed_commit": "3fd98ff9abd07eaaf829e531993755982e899b3a",
+  "merge_commit": "c10f7a25f54432a800de9877c1db5b0ab0b5ead0",
+  "recorded_at": "2026-09-24T01:02:00Z"
+}
