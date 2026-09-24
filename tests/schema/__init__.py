@@ -1,1 +1,1 @@
-"""Read-only shared-schema inspection and mapping checks for NEWAPP-003."""
+"""Read-only shared-schema inspection and DDL key reconciliation checks for NEWAPP-003 and NEWAPP-005."""

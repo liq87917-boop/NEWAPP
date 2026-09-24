@@ -1,0 +1,38 @@
+{
+  "request_type": "desktop_gpt_final_review",
+  "created_at": "2026-09-24T12:18:23.624895Z",
+  "task_id": "NEWAPP-005",
+  "run_id": "20260924T120656171027Z-2b7a68a2",
+  "task": {
+    "id": "NEWAPP-005",
+    "actions": [
+      "Map neutral CustomerKey/SupplierKey/UserKey/TenantId to actual NEWERP key types.",
+      "Prefer direct FK/view/repository mapping where safe; do not duplicate master tables.",
+      "Create migration plan and rollback notes."
+    ],
+    "acceptance": [
+      "DDL compiles in a disposable copy/test DB.",
+      "No destructive change to existing NEWERP tables."
+    ],
+    "phase": "P0",
+    "title": "Reconcile DDL with actual NEWERP keys",
+    "depends_on": [
+      "NEWAPP-003"
+    ]
+  },
+  "evidence_manifest": ".ai/evidence/NEWAPP-005/20260924T120656171027Z-2b7a68a2/manifest.json",
+  "brain_rules": ".ai/BRAIN_RULES.md",
+  "required_decision": {
+    "task_id": "NEWAPP-005",
+    "run_id": "20260924T120656171027Z-2b7a68a2",
+    "decision": [
+      "accept",
+      "human_gate",
+      "reject"
+    ],
+    "rationale": "non-empty string",
+    "criteria_results": [],
+    "required_fixes": []
+  },
+  "record_command": "start_agent.bat record-review NEWAPP-005 20260924T120656171027Z-2b7a68a2 --decision accept --rationale <text>"
+}

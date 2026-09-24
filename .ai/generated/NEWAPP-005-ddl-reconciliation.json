@@ -1,0 +1,1382 @@
+{
+  "task_id": "NEWAPP-005",
+  "task_title": "Reconcile DDL with actual NEWERP keys",
+  "task_phase": "P0",
+  "task_depends_on": [
+    "NEWAPP-003"
+  ],
+  "artifact": "newapp_ddl_key_reconciliation",
+  "schema_version": 1,
+  "generated_at": "2026-09-24T12:17:55.431555Z",
+  "generated_by": "newapp_executor (Cline/DeepSeek)",
+  "completion_authority": "the GPT brain (Codex desktop / ChatGPT mobile Remote) review, never the executor",
+  "executor_payload": {
+    "controller_payload_section_present": true,
+    "sources": [
+      ".ai/project_state.json#task_statuses.NEWAPP-005",
+      ".ai/brain/decisions/NEWAPP-005-plan.json",
+      "docs/NEWAPP_TASKS_V1.yaml#NEWAPP-005"
+    ],
+    "note": "Task identity, GPT plan, dependency ordering and allowed paths were read from the controller-owned records listed in sources. No queue, approval, branch or state file was written by the executor."
+  },
+  "safety_contract": {
+    "shared_connection_used": false,
+    "declared_value_recorded": false,
+    "environment_file_written": false,
+    "shared_objects_created_or_changed": false,
+    "ddl_or_dml_executed_against_shared_database": false,
+    "draft_applied": false,
+    "disposable_target_only": true,
+    "compile_transaction_rolled_back": true,
+    "objects_persisted_after_rollback": 0,
+    "duplicate_master_table_created": false,
+    "foreign_key_to_shared_table_generated": false,
+    "secrets_read_into_memory_only": true
+  },
+  "source_contracts": {
+    "planned_ddl": {
+      "path": "docs/NEWAPP_Database_DDL_V1.sql",
+      "sha256": "23211dfd77dc6f9baaf9653e2bf314719fe713d0a1a7d8f3860e9e748baf7f81",
+      "read_only": true,
+      "table_count": 20,
+      "index_count": 18,
+      "column_count": 163,
+      "declared_neutral_keys": [
+        "ChangedByUserKey",
+        "CorrectedByUserKey",
+        "CreatedByUserKey",
+        "CustomerKey",
+        "EntityKey",
+        "IdempotencyKey",
+        "ObjectKey",
+        "RequestedByUserKey",
+        "SalesGroupKey",
+        "SalesUserKey",
+        "SubmittedByUserKey",
+        "SupplierKey",
+        "TargetGroupKey",
+        "TemplateKey",
+        "TenantId",
+        "UpdatedByUserKey",
+        "UploadedByUserKey",
+        "UserKey"
+      ]
+    },
+    "accepted_schema_map": {
+      "path": ".ai/generated/NEWAPP-003-newerp-schema-map.json",
+      "sha256": "20e3730c31445f1c428a5e0f301146dc6e7424a57ba606f9d033f73fc21353eb",
+      "read_only": true,
+      "available": true,
+      "task_id": "NEWAPP-003",
+      "status": "evidence_collected",
+      "inspection_status": "inspected",
+      "table_count": 74,
+      "organization_domain_status": "absent_from_catalog",
+      "reason": null
+    }
+  },
+  "shared_connection_diagnostic": {
+    "declared_setting_name": "ERP_ConnectionStrings__Default",
+    "declared_setting_present": true,
+    "declared_setting_source": "process_environment",
+    "declared_value_recorded": false,
+    "environment_file": ".env",
+    "environment_file_read_only": true,
+    "environment_file_modified_time_unchanged_during_run": true,
+    "shared_connection_used": false
+  },
+  "classification_rules": [
+    {
+      "resolution": "resolved_direct",
+      "rule": "Exactly one authoritative target column is recorded for the neutral key in the accepted NEWAPP-003 map, with a recorded physical type. The app column is retyped to that type and a direct foreign key or repository join is the preferred mapping."
+    },
+    {
+      "resolution": "type_resolved_target_needs_review",
+      "rule": "Every recorded candidate target shares one physical type, so the storage type is unambiguous, but the authoritative table still needs GPT review. The app column is retyped and the choice is recorded as an open review item."
+    },
+    {
+      "resolution": "app_local",
+      "rule": "The identifier is owned by NEWAPP and has no NEWERP counterpart (OSS object key, idempotency key, change-log entity key). The neutral declaration is kept and no shared mapping is claimed."
+    },
+    {
+      "resolution": "unresolved_human_gate",
+      "rule": "No authoritative target, or no recorded type, exists in the accepted map. The neutral declaration is kept, the item is recorded as unresolved and the binding stays behind the Human Gate. A type or table name is never guessed."
+    }
+  ],
+  "reconciliation": {
+    "rule_count": 4,
+    "rows": [
+      {
+        "neutral_key": "CustomerKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 2,
+        "declaration_tables": [
+          "app.CustomerExt",
+          "app.InquiryTrip"
+        ],
+        "strategy": "Direct foreign key, or repository join, to the shared customer master. No duplicate customer master table is created.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.BaseCustomers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "customer",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.BaseCustomers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "SupplierKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 2,
+        "declaration_tables": [
+          "app.SupplierExt",
+          "app.SupplierVisit"
+        ],
+        "strategy": "Direct foreign key, or repository join, to the shared supplier master. No duplicate supplier master table is created.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.BaseSuppliers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "supplier",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.BaseSuppliers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "UserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 5,
+        "declaration_tables": [
+          "app.UserMobileProfile",
+          "app.UserIdentity",
+          "app.ClientDevice",
+          "app.IdempotencyRequest",
+          "app.AgentAudit"
+        ],
+        "strategy": "Shared user account pointer used by the mobile profile, identity, device, idempotency and audit tables.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "SalesUserKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.InquiryTrip"
+        ],
+        "strategy": "Both candidates are shared primary keys of the same recorded type, so the sales-user pointer can carry the shared key type; which table owns the sales relationship must be confirmed in review.",
+        "gate": "The authoritative table choice and any constraint stay behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          },
+          {
+            "target": "db_owner.BaseEmployees.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": "BIGINT",
+        "resolution": "type_resolved_target_needs_review",
+        "raised_to_shared_type": true,
+        "reason": "every recorded candidate target shares one physical type, so the storage type is unambiguous while the authoritative table still needs review"
+      },
+      {
+        "neutral_key": "SalesGroupKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.InquiryTrip"
+        ],
+        "strategy": "No group or team table is recorded in the accepted map, so the group pointer stays app-owned and neutral until review names an authoritative table.",
+        "gate": "A group-table binding is a shared-structure decision and stays behind the Human Gate.",
+        "review_pointer": "db_owner.SysRoles is the only role-shaped candidate recorded by NEWAPP-003 and is not the authoritative sales group.",
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": null,
+        "resolution": "unresolved_human_gate",
+        "raised_to_shared_type": false,
+        "reason": "the accepted map records no authoritative target for this key"
+      },
+      {
+        "neutral_key": "TargetGroupKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.InviteCode"
+        ],
+        "strategy": "Invite-code targeting follows the unknown group dimension of SalesGroupKey and stays app-owned and neutral until review names an authoritative table.",
+        "gate": "A group-table binding is a shared-structure decision and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": null,
+        "resolution": "unresolved_human_gate",
+        "raised_to_shared_type": false,
+        "reason": "the accepted map records no authoritative target for this key"
+      },
+      {
+        "neutral_key": "TemplateKey",
+        "family": null,
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.ExportJob"
+        ],
+        "strategy": "The export-template pointer is app-owned; no shared template binding is claimed.",
+        "gate": "A template-table binding is a shared-structure decision and stays behind the Human Gate.",
+        "review_pointer": "db_owner.SysPrintTemplates appears in the inspected catalog without recorded column detail, so it can only be a review pointer.",
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": null,
+        "resolution": "unresolved_human_gate",
+        "raised_to_shared_type": false,
+        "reason": "the accepted map records no authoritative target for this key"
+      },
+      {
+        "neutral_key": "TenantId",
+        "family": null,
+        "declared_type": "UNIQUEIDENTIFIER",
+        "declared_types": [
+          "UNIQUEIDENTIFIER"
+        ],
+        "declaration_count": 18,
+        "declaration_tables": [
+          "app.TenantSetting",
+          "app.UserMobileProfile",
+          "app.UserIdentity",
+          "app.InviteCode",
+          "app.FileAsset",
+          "app.CustomerExt",
+          "app.SupplierExt",
+          "app.InquiryTrip",
+          "app.SupplierVisit",
+          "app.InquiryItem",
+          "app.InquiryRevision",
+          "app.AIJob",
+          "app.AICorrection",
+          "app.ExportJob",
+          "app.ClientDevice",
+          "app.IdempotencyRequest",
+          "app.ChangeLog",
+          "app.AgentAudit"
+        ],
+        "strategy": "The accepted map reports the organization, tenant and company domain as absent from the inspected catalog, so the partition key keeps its neutral declaration and every app table keeps a tenant partition until review decides the authoritative binding.",
+        "gate": "Binding TenantId to a shared object is a shared-structure decision and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": null,
+        "resolution": "unresolved_human_gate",
+        "raised_to_shared_type": false,
+        "reason": "the accepted map reports the organization/tenant domain as absent_from_catalog and lists no binding table, so the partition key keeps its neutral declaration"
+      },
+      {
+        "neutral_key": "ObjectKey",
+        "family": null,
+        "declared_type": "NVARCHAR(600)",
+        "declared_types": [
+          "NVARCHAR(600)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.FileAsset"
+        ],
+        "strategy": "App-owned OSS object key; the shared bucket contract is documented by NEWAPP-004, not by this task.",
+        "gate": "None: no shared structure is involved.",
+        "review_pointer": null,
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": "NVARCHAR(600)",
+        "resolution": "app_local",
+        "raised_to_shared_type": false,
+        "reason": "the identifier is owned by NEWAPP and has no NEWERP counterpart"
+      },
+      {
+        "neutral_key": "IdempotencyKey",
+        "family": null,
+        "declared_type": "NVARCHAR(100)",
+        "declared_types": [
+          "NVARCHAR(100)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.IdempotencyRequest"
+        ],
+        "strategy": "App-owned client idempotency key; it is never written to a shared object.",
+        "gate": "None: no shared structure is involved.",
+        "review_pointer": null,
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": "NVARCHAR(100)",
+        "resolution": "app_local",
+        "raised_to_shared_type": false,
+        "reason": "the identifier is owned by NEWAPP and has no NEWERP counterpart"
+      },
+      {
+        "neutral_key": "EntityKey",
+        "family": null,
+        "declared_type": "NVARCHAR(120)",
+        "declared_types": [
+          "NVARCHAR(120)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.ChangeLog"
+        ],
+        "strategy": "App-owned change-log entity key that carries the already mapped key value of the changed entity.",
+        "gate": "None: no shared structure is involved.",
+        "review_pointer": null,
+        "evidence": [],
+        "target_table": null,
+        "target_column": null,
+        "target_type": null,
+        "target_primary_key": false,
+        "resolved_type": "NVARCHAR(120)",
+        "resolution": "app_local",
+        "raised_to_shared_type": false,
+        "reason": "the identifier is owned by NEWAPP and has no NEWERP counterpart"
+      },
+      {
+        "neutral_key": "CreatedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 4,
+        "declaration_tables": [
+          "app.InviteCode",
+          "app.SupplierVisit",
+          "app.InquiryItem",
+          "app.AIJob"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "UpdatedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 2,
+        "declaration_tables": [
+          "app.CustomerExt",
+          "app.SupplierExt"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "UploadedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.FileAsset"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "SubmittedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.InquiryRevision"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "RequestedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.ExportJob"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "CorrectedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.AICorrection"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      },
+      {
+        "neutral_key": "ChangedByUserKey",
+        "family": "user_pointer",
+        "declared_type": "NVARCHAR(80)",
+        "declared_types": [
+          "NVARCHAR(80)"
+        ],
+        "declaration_count": 1,
+        "declaration_tables": [
+          "app.ChangeLog"
+        ],
+        "strategy": "Audit or ownership pointer to the shared user account, so it carries the shared user key type.",
+        "gate": "The constraint itself is a shared-structure change and stays behind the Human Gate.",
+        "review_pointer": null,
+        "evidence": [
+          {
+            "target": "db_owner.SysUsers.Id",
+            "recorded": true,
+            "table_recorded": true,
+            "column_recorded": true,
+            "data_type": "bigint",
+            "declaration": "BIGINT",
+            "domain": "user",
+            "primary_key": true,
+            "is_identity": true,
+            "reason": null
+          }
+        ],
+        "target_table": "db_owner.SysUsers",
+        "target_column": "Id",
+        "target_type": "bigint",
+        "target_primary_key": true,
+        "resolved_type": "BIGINT",
+        "resolution": "resolved_direct",
+        "raised_to_shared_type": true,
+        "reason": "one authoritative target column with a recorded type"
+      }
+    ],
+    "row_count": 18,
+    "resolved_count": 10,
+    "needs_review_count": 1,
+    "app_local_count": 3,
+    "unresolved_count": 4,
+    "retyped_columns": [
+      "CustomerKey",
+      "SupplierKey",
+      "UserKey",
+      "SalesUserKey",
+      "CreatedByUserKey",
+      "UpdatedByUserKey",
+      "UploadedByUserKey",
+      "SubmittedByUserKey",
+      "RequestedByUserKey",
+      "CorrectedByUserKey",
+      "ChangedByUserKey"
+    ],
+    "kept_neutral_columns": [
+      "SalesGroupKey",
+      "TargetGroupKey",
+      "TemplateKey",
+      "TenantId",
+      "ObjectKey",
+      "IdempotencyKey",
+      "EntityKey"
+    ]
+  },
+  "reconciled_draft": {
+    "path": "database/NEWAPP_app_schema_reconciled_V1.sql",
+    "sha256": "3d3c7c89d7d7fedd6599c871eb12984b6a4d2e743b4436cb736728658692d93f",
+    "generated": true,
+    "applied": false,
+    "applied_to_shared_database": false,
+    "batch_count": 23,
+    "substitution_count": 21,
+    "substitutions": [
+      {
+        "table": "app.UserMobileProfile",
+        "column": "UserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 65,
+        "neutral_key": "UserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.UserIdentity",
+        "column": "UserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 86,
+        "neutral_key": "UserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.InviteCode",
+        "column": "CreatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 111,
+        "neutral_key": "CreatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.FileAsset",
+        "column": "UploadedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 134,
+        "neutral_key": "UploadedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.CustomerExt",
+        "column": "CustomerKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 153,
+        "neutral_key": "CustomerKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.BaseCustomers.Id"
+      },
+      {
+        "table": "app.CustomerExt",
+        "column": "UpdatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 158,
+        "neutral_key": "UpdatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.SupplierExt",
+        "column": "SupplierKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 172,
+        "neutral_key": "SupplierKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.BaseSuppliers.Id"
+      },
+      {
+        "table": "app.SupplierExt",
+        "column": "UpdatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 177,
+        "neutral_key": "UpdatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.InquiryTrip",
+        "column": "CustomerKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 194,
+        "neutral_key": "CustomerKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.BaseCustomers.Id"
+      },
+      {
+        "table": "app.InquiryTrip",
+        "column": "SalesUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 195,
+        "neutral_key": "SalesUserKey",
+        "resolution": "type_resolved_target_needs_review",
+        "target": null
+      },
+      {
+        "table": "app.SupplierVisit",
+        "column": "SupplierKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 220,
+        "neutral_key": "SupplierKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.BaseSuppliers.Id"
+      },
+      {
+        "table": "app.SupplierVisit",
+        "column": "CreatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 228,
+        "neutral_key": "CreatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.InquiryItem",
+        "column": "CreatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 265,
+        "neutral_key": "CreatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.InquiryRevision",
+        "column": "SubmittedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 308,
+        "neutral_key": "SubmittedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.AIJob",
+        "column": "CreatedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 354,
+        "neutral_key": "CreatedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.AICorrection",
+        "column": "CorrectedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 376,
+        "neutral_key": "CorrectedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.ExportJob",
+        "column": "RequestedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 389,
+        "neutral_key": "RequestedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.ClientDevice",
+        "column": "UserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 412,
+        "neutral_key": "UserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.IdempotencyRequest",
+        "column": "UserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 428,
+        "neutral_key": "UserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.ChangeLog",
+        "column": "ChangedByUserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 450,
+        "neutral_key": "ChangedByUserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      },
+      {
+        "table": "app.AgentAudit",
+        "column": "UserKey",
+        "from": "NVARCHAR(80)",
+        "to": "BIGINT",
+        "line": 464,
+        "neutral_key": "UserKey",
+        "resolution": "resolved_direct",
+        "target": "db_owner.SysUsers.Id"
+      }
+    ],
+    "guard_facts": {
+      "status": "passed",
+      "checks": [
+        {
+          "check": "every_create_batch_is_guarded",
+          "passed": true,
+          "detail": "every batch that creates an object is wrapped in an OBJECT_ID / NOT EXISTS guard"
+        },
+        {
+          "check": "no_destructive_statement",
+          "passed": true,
+          "detail": "no DROP, TRUNCATE, DELETE, UPDATE, INSERT, MERGE, ALTER or administrative token occurs in any statement"
+        },
+        {
+          "check": "no_external_schema_reference",
+          "passed": true,
+          "detail": "no statement references a db_owner, dbo or NEWERP object, so no shared object is touched"
+        },
+        {
+          "check": "no_database_switch",
+          "passed": true,
+          "detail": "the draft contains no USE statement"
+        },
+        {
+          "check": "begin_end_balanced",
+          "passed": true,
+          "detail": "BEGIN and END counts match in every batch"
+        },
+        {
+          "check": "parentheses_balanced",
+          "passed": true,
+          "detail": "parenthesis counts match in every batch"
+        },
+        {
+          "check": "every_batch_terminated",
+          "passed": true,
+          "detail": "every batch ends with a terminated statement or an END block terminator"
+        },
+        {
+          "check": "table_set_unchanged",
+          "passed": true,
+          "detail": "the draft declares exactly the app tables of the planned DDL contract"
+        },
+        {
+          "check": "column_set_unchanged",
+          "passed": true,
+          "detail": "the draft declares exactly the columns of the planned DDL contract in the same order"
+        },
+        {
+          "check": "only_registered_columns_retyped",
+          "passed": true,
+          "detail": "the rewritten declarations are exactly the registered resolved keys with their recorded shared type"
+        },
+        {
+          "check": "shared_type_applied_to_every_declaration_site",
+          "passed": true,
+          "detail": "every declaration site of a resolved key carries the recorded shared key type"
+        },
+        {
+          "check": "unresolved_keys_kept_neutral",
+          "passed": true,
+          "detail": "keys that are app-owned or still unresolved keep their planned declaration unchanged"
+        },
+        {
+          "check": "object_counts_unchanged",
+          "passed": true,
+          "detail": "the draft adds no object beyond the planned DDL contract"
+        },
+        {
+          "check": "no_generated_view_or_foreign_key",
+          "passed": true,
+          "detail": "view and foreign-key proposals stay documented review items instead of generated statements"
+        },
+        {
+          "check": "review_banner_present",
+          "passed": true,
+          "detail": "the draft carries the generated review banner that states this task must not apply it"
+        }
+      ],
+      "check_count": 15,
+      "passed_count": 15,
+      "failed_count": 0,
+      "issues": [],
+      "batch_count": 23,
+      "guarded_batch_count": 21,
+      "destructive_batches": [],
+      "external_schema_batches": [],
+      "create_table_count": 20,
+      "create_index_count": 18,
+      "column_count": 163,
+      "substitution_count": 21,
+      "unresolved_declaration_columns": [
+        "SalesGroupKey",
+        "TargetGroupKey",
+        "TemplateKey",
+        "TenantId"
+      ],
+      "app_local_columns": [
+        "EntityKey",
+        "IdempotencyKey",
+        "ObjectKey"
+      ]
+    },
+    "application_owner": "review only: the controller Human Gate and the GPT review own any application of this draft"
+  },
+  "disposable_compile_check": {
+    "requested": true,
+    "status": "compiled_and_rolled_back",
+    "reason": "every batch compiled twice inside one transaction that was rolled back, and no app object remained",
+    "target": {
+      "instance": "(localdb)\\MSSQLLocalDB",
+      "catalog": "tempdb",
+      "driver": "ODBC Driver 17 for SQL Server",
+      "server_kind": "localdb",
+      "catalog_kind": "scratch_database",
+      "integrated_security": true,
+      "connection_string_recorded": false,
+      "declared_value_recorded": false
+    },
+    "target_guard": {
+      "allowed": true,
+      "reasons": [],
+      "server_kind": "localdb",
+      "catalog_kind": "scratch_database",
+      "driver_selected": true,
+      "integrated_security": true,
+      "shares_declared_server": false,
+      "shares_declared_catalog": false,
+      "contains_declared_credential_material": false,
+      "declared_value_recorded": false,
+      "connection_string_recorded": false
+    },
+    "statement_guard": {
+      "status": "passed",
+      "batch_count": 23,
+      "offending_batches": [],
+      "offending_count": 0
+    },
+    "interpreter": {
+      "implementation": "CPython",
+      "version": "3.13.3",
+      "executable_name": "python.exe"
+    },
+    "driver_module_available": true,
+    "passes_requested": 2,
+    "expected_table_count": 20,
+    "execution": {
+      "attempted": true,
+      "outcome": "executed",
+      "status": "compiled_and_rolled_back",
+      "passes_requested": 2,
+      "passes_completed": 2,
+      "batches_executed": 46,
+      "statements_executed": 46,
+      "tables_visible_in_transaction": 20,
+      "tables_after_rollback": 0,
+      "rollback_confirmed": true,
+      "transaction_rolled_back": true,
+      "commit_called": false,
+      "connection_closed": true,
+      "autocommit": false,
+      "elapsed_seconds": 0.082,
+      "errors": []
+    },
+    "idempotent_second_pass": true,
+    "tables_created_visible": 20,
+    "expected_table_count_matched": true,
+    "shared_connection_used": false,
+    "applied_to_shared_database": false
+  },
+  "human_gate": {
+    "shared_structure_change": true,
+    "applied_by_this_task": false,
+    "foreign_key_to_shared_table_generated": false,
+    "duplicate_master_table_created": false,
+    "requires_approval_before_execution": true,
+    "note": "Applying the draft, adding a constraint to a shared table or migrating the shared database is a shared-structure change that stays behind the controller Human Gate and the GPT review."
+  },
+  "limitations": [
+    "The reconciliation reads the accepted NEWAPP-003 snapshot, so a shared table created after that inspection is not represented and the map is metadata rather than a live binding.",
+    "Raising a neutral key to the recorded shared key type aligns the column type; it does not create the foreign key, which stays a Human-Gated shared-structure change.",
+    "TenantId keeps its UNIQUEIDENTIFIER declaration because the accepted map reports the organization, tenant and company domain as absent from the inspected catalog.",
+    "Group and template pointers keep their neutral declarations because no authoritative table for them is recorded; they are review items, not resolved mappings.",
+    "The disposable compile check runs the draft inside one rolled-back transaction on a local disposable engine, so it proves compilation, guard coverage and idempotent re-run rather than behaviour against shared data.",
+    "When the ODBC driver module is not importable in the generating interpreter, the compile check is reported as engine_unavailable together with the regenerating command instead of an implicit pass.",
+    "Applying the draft to the shared NEWERP database, adding a foreign key to a shared table and migrating a shared database are outside this task and stay behind the Human Gate.",
+    "agent.env, secrets, signing material and the OSS credentials are never opened by this module."
+  ],
+  "artifacts": {
+    "reports": [
+      ".ai/generated/NEWAPP-005-ddl-reconciliation.json"
+    ],
+    "documents": [
+      "docs/NEWAPP_DDL_RECONCILIATION.md"
+    ],
+    "drafts": [
+      "database/NEWAPP_app_schema_reconciled_V1.sql"
+    ],
+    "executor_paths": [
+      ".ai/generated/NEWAPP-005-ddl-reconciliation.json",
+      "docs/NEWAPP_DDL_RECONCILIATION.md",
+      "database/NEWAPP_app_schema_reconciled_V1.sql",
+      "tests/schema/__init__.py",
+      "tests/schema/ddl_reconciliation.py",
+      "tests/schema/test_ddl_reconciliation.py"
+    ],
+    "planned_ddl_contract": "docs/NEWAPP_Database_DDL_V1.sql",
+    "accepted_schema_map": ".ai/generated/NEWAPP-003-newerp-schema-map.json"
+  },
+  "path_guard": {
+    "allowed_patterns_source": ".ai/agent_config.yaml#paths.executor_allowed",
+    "allowed_patterns": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "database/**",
+      ".github/**",
+      ".ai/generated/**",
+      "*.sln",
+      "*.md",
+      ".gitignore"
+    ],
+    "normalization": "common.path_matches applies path.replace('\\\\','/') and removes only exact leading './' prefixes before fnmatch, so dot-directory patterns are preserved",
+    "paths": [
+      {
+        "path": ".ai/generated/NEWAPP-005-ddl-reconciliation.json",
+        "normalized_for_guard": ".ai/generated/newapp-005-ddl-reconciliation.json",
+        "accepted": true,
+        "matched_patterns": [
+          ".ai/generated/**"
+        ]
+      },
+      {
+        "path": "docs/NEWAPP_DDL_RECONCILIATION.md",
+        "normalized_for_guard": "docs/newapp_ddl_reconciliation.md",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**",
+          "*.md"
+        ]
+      },
+      {
+        "path": "database/NEWAPP_app_schema_reconciled_V1.sql",
+        "normalized_for_guard": "database/newapp_app_schema_reconciled_v1.sql",
+        "accepted": true,
+        "matched_patterns": [
+          "database/**"
+        ]
+      },
+      {
+        "path": "tests/schema/__init__.py",
+        "normalized_for_guard": "tests/schema/__init__.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/schema/ddl_reconciliation.py",
+        "normalized_for_guard": "tests/schema/ddl_reconciliation.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": "tests/schema/test_ddl_reconciliation.py",
+        "normalized_for_guard": "tests/schema/test_ddl_reconciliation.py",
+        "accepted": true,
+        "matched_patterns": [
+          "tests/**"
+        ]
+      },
+      {
+        "path": ".ai/generated/NEWAPP-005-ddl-reconciliation.json",
+        "normalized_for_guard": ".ai/generated/newapp-005-ddl-reconciliation.json",
+        "accepted": true,
+        "matched_patterns": [
+          ".ai/generated/**"
+        ]
+      },
+      {
+        "path": "docs/NEWAPP_DDL_RECONCILIATION.md",
+        "normalized_for_guard": "docs/newapp_ddl_reconciliation.md",
+        "accepted": true,
+        "matched_patterns": [
+          "docs/**",
+          "*.md"
+        ]
+      },
+      {
+        "path": "database/NEWAPP_app_schema_reconciled_V1.sql",
+        "normalized_for_guard": "database/newapp_app_schema_reconciled_v1.sql",
+        "accepted": true,
+        "matched_patterns": [
+          "database/**"
+        ]
+      }
+    ],
+    "all_paths_accepted": true,
+    "protected_paths_touched": [],
+    "no_protected_path_touched": true
+  },
+  "artifact_checks": {
+    "report_credential_guard": {
+      "label": ".ai/generated/NEWAPP-005-ddl-reconciliation.json",
+      "status": "passed",
+      "findings": [],
+      "findings_count": 0,
+      "needle_count": 4,
+      "values_recorded": false
+    },
+    "documentation_credential_guard": {
+      "label": "docs/NEWAPP_DDL_RECONCILIATION.md",
+      "status": "passed",
+      "findings": [],
+      "findings_count": 0,
+      "needle_count": 4,
+      "values_recorded": false
+    },
+    "draft_credential_guard": {
+      "label": "database/NEWAPP_app_schema_reconciled_V1.sql",
+      "status": "passed",
+      "findings": [],
+      "findings_count": 0,
+      "needle_count": 4,
+      "values_recorded": false
+    },
+    "scanner_self_check": {
+      "available": true,
+      "scanner": "tests/baseline/secret_scan.py",
+      "scope": "content rules of the repository scanner applied to the generated artifacts",
+      "checked_paths": [
+        ".ai/generated/NEWAPP-005-ddl-reconciliation.json",
+        "database/NEWAPP_app_schema_reconciled_V1.sql",
+        "docs/NEWAPP_DDL_RECONCILIATION.md"
+      ],
+      "findings": [],
+      "findings_count": 0,
+      "values_recorded": false,
+      "status": "passed"
+    }
+  },
+  "artifact_check_passes": 1,
+  "artifact_checks_verified": true,
+  "status": "evidence_collected",
+  "unresolved": [
+    {
+      "item": "authoritative table for SalesUserKey",
+      "reason": "the storage type is recorded but more than one candidate target exists: db_owner.SysUsers.Id, db_owner.BaseEmployees.Id",
+      "next_action": "confirm which candidate owns the relationship during GPT review; the draft already carries the recorded shared key type"
+    },
+    {
+      "item": "authoritative shared binding for SalesGroupKey",
+      "reason": "the accepted map records no authoritative target for this key",
+      "next_action": "decide the binding during GPT review; the declaration stays neutral until then and any constraint stays behind the Human Gate"
+    },
+    {
+      "item": "authoritative shared binding for TargetGroupKey",
+      "reason": "the accepted map records no authoritative target for this key",
+      "next_action": "decide the binding during GPT review; the declaration stays neutral until then and any constraint stays behind the Human Gate"
+    },
+    {
+      "item": "authoritative shared binding for TemplateKey",
+      "reason": "the accepted map records no authoritative target for this key",
+      "next_action": "decide the binding during GPT review; the declaration stays neutral until then and any constraint stays behind the Human Gate"
+    },
+    {
+      "item": "authoritative shared binding for TenantId",
+      "reason": "the accepted map reports the organization/tenant domain as absent_from_catalog and lists no binding table, so the partition key keeps its neutral declaration",
+      "next_action": "decide the binding during GPT review; the declaration stays neutral until then and any constraint stays behind the Human Gate"
+    },
+    {
+      "item": "shared schema application of the reconciled draft",
+      "reason": "applying the draft, adding a constraint to a shared table or migrating the shared database is a shared-structure change owned by the Human Gate",
+      "next_action": "record the Human Gate approval through the controller and execute the migration in a disposable database first; this task only produces the reviewed draft"
+    },
+    {
+      "item": "foreign key and view proposals",
+      "reason": "a direct foreign key to a shared master table and a view-backed read model are the preferred mapping, but both would change shared structures",
+      "next_action": "raise them as a separate gated change after the migration review instead of generating them in this draft"
+    }
+  ],
+  "acceptance_evidence": [
+    {
+      "criterion": "Every neutral CustomerKey, SupplierKey, UserKey and TenantId reference is classified against the accepted NEWAPP-003 map; resolved keys carry the recorded shared key type and unresolved keys keep their neutral declaration.",
+      "evidence": "declared neutral keys: 18; classified rows: 18; shared type applied: CustomerKey, SupplierKey, UserKey, SalesUserKey, CreatedByUserKey, UpdatedByUserKey, UploadedByUserKey, SubmittedByUserKey, RequestedByUserKey, CorrectedByUserKey, ChangedByUserKey; kept neutral: SalesGroupKey, TargetGroupKey, TemplateKey, TenantId, ObjectKey, IdempotencyKey, EntityKey",
+      "satisfied": true
+    },
+    {
+      "criterion": "The reconciled draft compiles and re-runs idempotently in a disposable database.",
+      "evidence": "compile status: compiled_and_rolled_back; passes completed: 2; batches executed: 46; app tables visible in the transaction: 20; app tables after rollback: 0",
+      "satisfied": true
+    },
+    {
+      "criterion": "No destructive change to an existing NEWERP table, no shared object touched and no duplicate customer or supplier master table created.",
+      "evidence": "static guard status: passed; destructive batches: 0; external schema batches: 0; shared objects changed: no",
+      "satisfied": true
+    },
+    {
+      "criterion": "A migration plan and rollback notes exist, and every shared-structure change stops at the Human Gate.",
+      "evidence": "documents: docs/NEWAPP_DDL_RECONCILIATION.md; applied by this task: no; approval required before execution: yes",
+      "satisfied": true
+    },
+    {
+      "criterion": "Generated artifacts stay inside the executor allowed paths and contain no credential material.",
+      "evidence": "checked by the credential guard, the repository scanner and the path guard",
+      "satisfied": true
+    }
+  ]
+}
