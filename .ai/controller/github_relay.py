@@ -11,6 +11,10 @@ def _settings() -> dict[str, Any]:
     return config()["github_relay"]
 
 
+def _local_only() -> bool:
+    return str(_settings().get("publication_mode", "remote")).lower() == "local_only"
+
+
 def _checked(command: list[str], message: str) -> str:
     result = run(command)
     if result.returncode != 0:
@@ -39,7 +43,7 @@ def preflight() -> dict[str, Any]:
         blockers.append(f"Git remote {remote} is missing or unexpected")
 
     reachable = False
-    if actual_url:
+    if actual_url and not _local_only():
         probe = git(["ls-remote", "--exit-code", remote, f"refs/heads/{settings['base_branch']}"])
         reachable = probe.returncode == 0 and bool(probe.stdout.strip())
         if not reachable:
@@ -53,7 +57,8 @@ def preflight() -> dict[str, Any]:
         "status": "ready" if not blockers else "blocked",
         "repository": settings["repository"],
         "remote_url": actual_url,
-        "git_authenticated": reachable,
+        "git_authenticated": reachable if not _local_only() else None,
+        "publication_mode": "local_only" if _local_only() else "remote",
         "transport": "git_ssh",
         "github_cli_required": False,
         "private": True if settings.get("require_private") else None,
@@ -80,8 +85,9 @@ def publish_control_update(message: str, paths: list[str]) -> dict[str, Any]:
     staged = git(["diff", "--cached", "--quiet"])
     if staged.returncode == 1:
         _checked(["git", "commit", "-m", message], "Cannot commit control decision")
-    _checked(["git", "push", settings["remote"], settings["base_branch"]], "Cannot push control decision")
-    return {"status": "published", "branch": settings["base_branch"]}
+    if not _local_only():
+        _checked(["git", "push", settings["remote"], settings["base_branch"]], "Cannot push control decision")
+    return {"status": "committed_local" if _local_only() else "published", "branch": settings["base_branch"], "relay_mode": "local_only" if _local_only() else "git_branch"}
 
 
 def prepare_task_branch(task_id: str, run_id: str) -> str:
@@ -91,8 +97,9 @@ def prepare_task_branch(task_id: str, run_id: str) -> str:
         raise RuntimeError("Task execution must start from the main branch")
     if git(["status", "--porcelain"]).stdout.strip():
         raise RuntimeError("Working tree must be clean before creating a task branch")
-    _checked(["git", "fetch", settings["remote"], settings["base_branch"]], "Cannot fetch GitHub main")
-    _checked(["git", "pull", "--ff-only", settings["remote"], settings["base_branch"]], "Cannot fast-forward main")
+    if not _local_only():
+        _checked(["git", "fetch", settings["remote"], settings["base_branch"]], "Cannot fetch GitHub main")
+        _checked(["git", "pull", "--ff-only", settings["remote"], settings["base_branch"]], "Cannot fast-forward main")
     branch = f"{settings['branch_prefix']}{task_id.lower()}-{run_id[-8:]}"
     _checked(["git", "switch", "-c", branch], "Cannot create task branch")
     return branch
@@ -117,18 +124,19 @@ def publish_candidate(
     if git(["diff", "--cached", "--quiet"]).returncode == 0:
         raise RuntimeError("Task produced no publishable changes")
     _checked(["git", "commit", "-m", f"{task['id']}: candidate for GPT review"], "Cannot commit task candidate")
-    _checked(["git", "push", "-u", settings["remote"], branch], "Cannot push task branch")
+    if not _local_only():
+        _checked(["git", "push", "-u", settings["remote"], branch], "Cannot push task branch")
     # Runtime state/audit belong to main in rolling mode; do not merge branch-local
     # snapshots back later and overwrite newer queue/review information.
     git(["restore", "--", ".ai/project_state.json", ".ai/audit.jsonl"])
     encoded_branch = quote(branch, safe="/-_.")
-    review_url = f"{_repo_web_url()}/tree/{encoded_branch}"
+    review_url = None if _local_only() else f"{_repo_web_url()}/tree/{encoded_branch}"
     return {
-        "status": "published",
+        "status": "committed_local" if _local_only() else "published",
         "branch": branch,
         "review_url": review_url,
         "pr_url": None,
-        "relay_mode": "git_branch",
+        "relay_mode": "local_only" if _local_only() else "git_branch",
     }
 
 
@@ -140,8 +148,9 @@ def return_to_base() -> None:
         raise RuntimeError("Cannot return to main with a dirty task branch")
     if current_branch() != base:
         _checked(["git", "switch", base], "Cannot return to main")
-    _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
-    _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
+    if not _local_only():
+        _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
+        _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
 
 
 def refresh_base() -> None:
@@ -152,8 +161,9 @@ def refresh_base() -> None:
         raise RuntimeError("Idle refresh requires the base branch")
     if git(["status", "--porcelain"]).stdout.strip():
         raise RuntimeError("Idle refresh requires a clean working tree")
-    _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
-    _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
+    if not _local_only():
+        _checked(["git", "fetch", remote, base], "Cannot fetch GitHub main")
+        _checked(["git", "pull", "--ff-only", remote, base], "Cannot refresh main")
 
 
 def publish_branch_metadata(message: str, paths: list[str], branch: str) -> None:
@@ -163,7 +173,8 @@ def publish_branch_metadata(message: str, paths: list[str], branch: str) -> None
     _checked(["git", "add", "--", *paths], "Cannot stage branch metadata")
     if git(["diff", "--cached", "--quiet"]).returncode == 1:
         _checked(["git", "commit", "-m", message], "Cannot commit branch metadata")
-        _checked(["git", "push", settings["remote"], branch], "Cannot push branch metadata")
+        if not _local_only():
+            _checked(["git", "push", settings["remote"], branch], "Cannot push branch metadata")
 
 
 def finalize_review(task_id: str, branch: str, decision: str, paths: list[str], rationale: str) -> dict[str, Any]:
@@ -186,8 +197,9 @@ def finalize_review(task_id: str, branch: str, decision: str, paths: list[str], 
     base_branch = str(settings["base_branch"])
     remote = str(settings["remote"])
     _checked(["git", "switch", base_branch], "Cannot return to main")
-    _checked(["git", "fetch", remote, base_branch], "Cannot fetch GitHub main")
-    _checked(["git", "pull", "--ff-only", remote, base_branch], "Cannot refresh merged main")
+    if not _local_only():
+        _checked(["git", "fetch", remote, base_branch], "Cannot fetch GitHub main")
+        _checked(["git", "pull", "--ff-only", remote, base_branch], "Cannot refresh merged main")
 
     squash = git(["merge", "--squash", branch])
     if squash.returncode != 0:
@@ -199,15 +211,17 @@ def finalize_review(task_id: str, branch: str, decision: str, paths: list[str], 
             ["git", "commit", "-m", f"{task_id}: accepted by GPT"],
             "Cannot commit accepted task",
         )
-    _checked(["git", "push", remote, base_branch], "Cannot push accepted task to main")
+    if not _local_only():
+        _checked(["git", "push", remote, base_branch], "Cannot push accepted task to main")
 
     # Branch cleanup is best-effort after main is safely pushed.
-    git(["push", remote, "--delete", branch])
+    if not _local_only():
+        git(["push", remote, "--delete", branch])
     git(["branch", "-D", branch])
     return {
         "status": "merged",
         "branch": branch,
         "merged": True,
-        "relay_mode": "git_branch",
-        "review_url": f"{_repo_web_url()}/commits/{base_branch}",
+        "relay_mode": "local_only" if _local_only() else "git_branch",
+        "review_url": None if _local_only() else f"{_repo_web_url()}/commits/{base_branch}",
     }

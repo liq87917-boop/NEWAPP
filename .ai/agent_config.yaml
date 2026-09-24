@@ -31,6 +31,7 @@
   },
   "github_relay": {
     "enabled": true,
+    "publication_mode": "local_only",
     "repository": "liq87917-boop/NEWAPP",
     "remote": "origin",
     "remote_url": "git@github.com:liq87917-boop/NEWAPP.git",

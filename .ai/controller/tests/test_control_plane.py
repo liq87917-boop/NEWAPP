@@ -125,6 +125,9 @@ class ControlPlaneContractTests(unittest.TestCase):
         self.assertEqual("git_ssh", settings["transport"])
         self.assertEqual("main", settings["base_branch"])
 
+    def test_github_relay_is_local_only_until_remote_write_is_authorized(self) -> None:
+        self.assertEqual("local_only", config()["github_relay"]["publication_mode"])
+
 
 if __name__ == "__main__":
     unittest.main()
