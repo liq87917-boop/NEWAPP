@@ -1,0 +1,21 @@
+{
+  "task_id": "NEWAPP-007",
+  "decision": "execute",
+  "rationale": "Create the backend solution skeleton now as a pre-approved dependency-linked follow-on. Execution remains blocked until NEWAPP-005 completes. This task establishes ASP.NET Core API/Domain/Infrastructure/Worker/Tests structure and typed configuration binding only; it must not apply shared-database DDL, mutate production data, deploy, or expose secrets.",
+  "validation_focus": [
+    "Create/build the ASP.NET Core solution/projects using repository-approved paths only.",
+    "Health endpoint works locally without external production mutation.",
+    "Typed options bind existing .env key names server-side; missing configuration errors expose key names only, never values.",
+    "No mobile direct SQL/OSS secret use and no production DB/OSS/deployment action.",
+    "Add focused unit/integration tests for startup/config validation and keep changes independent of NEWERP shared schema writes."
+  ],
+  "risks": [
+    "Dependency gate: execute only after NEWAPP-005 is completed.",
+    "Do not run migrations or create/alter shared SQL Server objects.",
+    "Do not log connection strings, passwords, OSS secrets, JWT keys or provider tokens.",
+    "Any need for shared database structure change must stop at Human Gate rather than being implemented here."
+  ],
+  "actor": "Codex GPT Remote",
+  "source": "immediate_gpt_rolling_planner",
+  "recorded_at": "2026-09-24T01:03:00Z"
+}
