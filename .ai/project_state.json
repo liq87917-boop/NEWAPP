@@ -93,12 +93,12 @@
     },
     "NEWAPP-004": {
       "status": "queued",
-      "updated_at": "2026-09-24T00:17:00Z",
+      "updated_at": "2026-09-24T11:56:32.182696Z",
       "brain_decision": ".ai/brain/decisions/NEWAPP-004-plan.json"
     },
     "NEWAPP-005": {
       "status": "queued",
-      "updated_at": "2026-09-24T00:17:00Z",
+      "updated_at": "2026-09-24T11:56:32.182705Z",
       "brain_decision": ".ai/brain/decisions/NEWAPP-005-plan.json"
     },
     "NEWAPP-006": {
@@ -190,6 +190,6 @@
     "source": "codex_desktop_or_mobile_remote",
     "recorded_at": "2026-09-24T11:48:10.045097Z"
   },
-  "updated_at": "2026-09-24T11:48:10.346975Z",
-  "next_action": "Execute NEWAPP-004 next; NEWAPP-005 is also dependency-safe after NEWAPP-003 completion. Continue rolling tasks one at a time with independent commits."
+  "updated_at": "2026-09-24T11:56:32.182709Z",
+  "next_action": "Execute NEWAPP-004 next, then NEWAPP-005 while both are dependency-safe; commit each candidate locally."
 }
