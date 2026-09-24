@@ -1,0 +1,549 @@
+{
+  "task_id": "NEWAPP-006",
+  "task_title": "Establish automated status console",
+  "task_phase": "P0",
+  "artifact": "console_status_contract_report",
+  "generated_at": "2026-09-23T12:24:01.429951Z",
+  "generated_by": "newapp_executor (Cline/DeepSeek)",
+  "completion_authority": "GPT brain final review; this artifact is evidence only",
+  "read_only": true,
+  "status": "verified",
+  "verification": {
+    "console_entry_point_exists": true,
+    "console_starts_from_repository_root": true,
+    "console_dispatches_controller_with_arguments": true,
+    "console_default_command_is_rolling_run": true,
+    "console_documents_read_only_preflight": true,
+    "console_propagates_exit_code": true,
+    "controller_exposes_console_commands": true,
+    "preflight_defaults_to_read_only": true,
+    "snapshot_is_json_serialisable": true,
+    "queue_reason_is_machine_readable": true,
+    "snapshot_contains_no_known_environment_value": true,
+    "snapshot_passes_repository_content_rules": true,
+    "pending_review_does_not_block_unrelated_task": true,
+    "active_execution_is_exclusive": true,
+    "completed_queue_reports_queue_empty": true,
+    "rolling_queue_allows_unrelated_work_while_review_pending": true
+  },
+  "verification_summary": {
+    "checks_total": 16,
+    "checks_passed": 16,
+    "checks_failed": [],
+    "secret_value_leaks": [],
+    "content_rule_findings": []
+  },
+  "queue_semantics": {
+    "available": true,
+    "baseline_ready": true,
+    "baseline_task": "NEWAPP-002",
+    "pending_review_case": "unrelated_task_still_selected",
+    "pending_review_task": "NEWAPP-006",
+    "selected_after_review": "NEWAPP-002",
+    "pending_review_does_not_block_unrelated_task": true,
+    "active_execution_is_exclusive": true,
+    "completed_queue_is_empty": true
+  },
+  "status_snapshot": {
+    "generated_at": "2026-09-23T12:24:01.257234Z",
+    "read_only": true,
+    "console": {
+      "entry_point": {
+        "path": "start_agent.bat",
+        "exists": true,
+        "sha256": "3e5d73a333681aa6c10442fe92cdda51fee533b392b5042fccf70f64d5894da8",
+        "changes_to_repository_root": true,
+        "python_selection": {
+          "local_virtual_environment": true,
+          "windows_launcher": true,
+          "system_interpreter": true
+        },
+        "controller_entry_point": ".ai/controller/agent_loop.py",
+        "dispatches_controller": true,
+        "forwards_explicit_arguments": true,
+        "default_command": "run",
+        "read_only_path_documented": true,
+        "keeps_window_open_on_blocker": true,
+        "exit_code_propagated": true
+      },
+      "controller": {
+        "path": ".ai/controller/agent_loop.py",
+        "exists": true,
+        "sha256": "206ca4862fbc9e2218cf59897a9fea8c8690ca07876f239999fe6e173a027c32",
+        "markers": {
+          "status_subcommand": true,
+          "preflight_subcommand": true,
+          "status_dispatch": true,
+          "preflight_dispatch": true,
+          "preflight_read_only_signature": true,
+          "status_reader": true
+        },
+        "commands": {
+          "preflight": true,
+          "status": true,
+          "plan": true,
+          "run-once": true,
+          "run": true
+        },
+        "contract_intact": true
+      },
+      "commands": [
+        "preflight",
+        "status",
+        "plan",
+        "run-once",
+        "run"
+      ]
+    },
+    "sources": [
+      {
+        "path": ".ai/project_state.json",
+        "role": "mutable queue, phase, blocker and last-validation state",
+        "exists": true,
+        "sha256": "f550347f6020066a170b3a484b47f2ac075508b1278b876cb8adce0f50e93d97"
+      },
+      {
+        "path": "docs/NEWAPP_TASKS_V1.yaml",
+        "role": "immutable task blueprint and dependency graph",
+        "exists": true,
+        "sha256": "53c2385e184397b2d93a45ee7866c47d77d0634d461f8ea1338d774e89a5f97d"
+      },
+      {
+        "path": ".ai/agent_config.yaml",
+        "role": "controller policy: allowed/protected paths, gates, rolling queue",
+        "exists": true,
+        "sha256": "a102154524885e137640c5bdd22520af6ac4aa8c45575a76d1b4684296f9a124"
+      },
+      {
+        "path": ".ai/audit.jsonl",
+        "role": "append-only control-plane audit trail",
+        "exists": true,
+        "sha256": "c847f4e69dbaa32164abff9bed0952c9d5107ea554344a402ba903f36db00f85"
+      }
+    ],
+    "git": {
+      "repository_present": true,
+      "baseline_commit_present": true,
+      "head_commit": "cc17a6a27d7bf78df9e4f361678ceacb2dc2d672",
+      "branch": "agent/newapp-006-57fb36d2",
+      "worktree_clean": false,
+      "tracked_file_count": 57
+    },
+    "queue": {
+      "phase": "executing",
+      "paused": false,
+      "pause_reason": null,
+      "current_task": null,
+      "last_completed_task": "NEWAPP-001",
+      "last_run_id": "20260923T121901530625Z-57fb36d2",
+      "queue_head": null,
+      "queue_reason": "NEWAPP-006 status=executing is an active execution",
+      "status_counts": {
+        "awaiting_review": 1,
+        "completed": 1,
+        "executing": 1,
+        "queued": 65
+      },
+      "active_executions": [
+        "NEWAPP-006"
+      ],
+      "pending_reviews": [
+        "NEWAPP-002"
+      ],
+      "planned_tasks": [
+        "NEWAPP-002",
+        "NEWAPP-003",
+        "NEWAPP-004",
+        "NEWAPP-006"
+      ],
+      "attention": [],
+      "rows": [
+        {
+          "id": "NEWAPP-001",
+          "status": "completed",
+          "title": "Freeze repository baseline and secret rules"
+        },
+        {
+          "id": "NEWAPP-002",
+          "status": "awaiting_review",
+          "title": "Inspect existing .env configuration contract safely"
+        },
+        {
+          "id": "NEWAPP-003",
+          "status": "queued",
+          "title": "Inspect NEWERP shared database schema"
+        },
+        {
+          "id": "NEWAPP-004",
+          "status": "queued",
+          "title": "Inspect shared OSS contract"
+        },
+        {
+          "id": "NEWAPP-005",
+          "status": "queued",
+          "title": "Reconcile DDL with actual NEWERP keys"
+        },
+        {
+          "id": "NEWAPP-006",
+          "status": "executing",
+          "title": "Establish automated status console"
+        },
+        {
+          "id": "NEWAPP-007",
+          "status": "queued",
+          "title": "Create backend solution skeleton"
+        },
+        {
+          "id": "NEWAPP-008",
+          "status": "queued",
+          "title": "Create shared database repositories"
+        },
+        {
+          "id": "NEWAPP-009",
+          "status": "queued",
+          "title": "Apply app schema migration in test database"
+        },
+        {
+          "id": "NEWAPP-010",
+          "status": "queued",
+          "title": "Implement shared OSS abstraction"
+        },
+        {
+          "id": "NEWAPP-011",
+          "status": "queued",
+          "title": "Define OpenAPI generation and compatibility gate"
+        },
+        {
+          "id": "NEWAPP-012",
+          "status": "queued",
+          "title": "Create Flutter app shell"
+        },
+        {
+          "id": "NEWAPP-013",
+          "status": "queued",
+          "title": "Create HarmonyOS NEXT app shell"
+        },
+        {
+          "id": "NEWAPP-014",
+          "status": "queued",
+          "title": "Add observability and correlation IDs"
+        },
+        {
+          "id": "NEWAPP-015",
+          "status": "queued",
+          "title": "Implement account-password login"
+        },
+        {
+          "id": "NEWAPP-016",
+          "status": "queued",
+          "title": "Implement SMS login and registration"
+        },
+        {
+          "id": "NEWAPP-017",
+          "status": "queued",
+          "title": "Implement WeChat login"
+        },
+        {
+          "id": "NEWAPP-018",
+          "status": "queued",
+          "title": "Implement Apple ID login"
+        },
+        {
+          "id": "NEWAPP-019",
+          "status": "queued",
+          "title": "Implement carrier one-tap phone login adapter"
+        },
+        {
+          "id": "NEWAPP-020",
+          "status": "queued",
+          "title": "Bootstrap endpoint and client startup"
+        },
+        {
+          "id": "NEWAPP-021",
+          "status": "queued",
+          "title": "Customer list with group data scope"
+        },
+        {
+          "id": "NEWAPP-022",
+          "status": "queued",
+          "title": "Customer create edit soft-delete"
+        },
+        {
+          "id": "NEWAPP-023",
+          "status": "queued",
+          "title": "Supplier list shared inside tenant"
+        },
+        {
+          "id": "NEWAPP-024",
+          "status": "queued",
+          "title": "Supplier create edit soft-delete"
+        },
+        {
+          "id": "NEWAPP-025",
+          "status": "queued",
+          "title": "Customer and supplier mobile UI"
+        },
+        {
+          "id": "NEWAPP-026",
+          "status": "queued",
+          "title": "InquiryTrip domain and API"
+        },
+        {
+          "id": "NEWAPP-027",
+          "status": "queued",
+          "title": "SupplierVisit domain and API"
+        },
+        {
+          "id": "NEWAPP-028",
+          "status": "queued",
+          "title": "InquiryItem draft CRUD"
+        },
+        {
+          "id": "NEWAPP-029",
+          "status": "queued",
+          "title": "Submit store and immutable revision"
+        },
+        {
+          "id": "NEWAPP-030",
+          "status": "queued",
+          "title": "Core inquiry mobile screens"
+        },
+        {
+          "id": "NEWAPP-031",
+          "status": "queued",
+          "title": "Camera capture and local image pipeline"
+        },
+        {
+          "id": "NEWAPP-032",
+          "status": "queued",
+          "title": "OSS upload queue"
+        },
+        {
+          "id": "NEWAPP-033",
+          "status": "queued",
+          "title": "Business card OCR service"
+        },
+        {
+          "id": "NEWAPP-034",
+          "status": "queued",
+          "title": "Business card scan UI"
+        },
+        {
+          "id": "NEWAPP-035",
+          "status": "queued",
+          "title": "Product photo quality detector"
+        },
+        {
+          "id": "NEWAPP-036",
+          "status": "queued",
+          "title": "Handwriting OCR baseline"
+        },
+        {
+          "id": "NEWAPP-037",
+          "status": "queued",
+          "title": "Quotation field parser"
+        },
+        {
+          "id": "NEWAPP-038",
+          "status": "queued",
+          "title": "AI confirmation UI"
+        },
+        {
+          "id": "NEWAPP-039",
+          "status": "queued",
+          "title": "Translation service and UI"
+        },
+        {
+          "id": "NEWAPP-040",
+          "status": "queued",
+          "title": "Batch capture queue"
+        },
+        {
+          "id": "NEWAPP-041",
+          "status": "queued",
+          "title": "Batch AI orchestration"
+        },
+        {
+          "id": "NEWAPP-042",
+          "status": "queued",
+          "title": "Batch review and bulk draft generation"
+        },
+        {
+          "id": "NEWAPP-043",
+          "status": "queued",
+          "title": "Excel template model"
+        },
+        {
+          "id": "NEWAPP-044",
+          "status": "queued",
+          "title": "Excel export worker"
+        },
+        {
+          "id": "NEWAPP-045",
+          "status": "queued",
+          "title": "Excel export UI"
+        },
+        {
+          "id": "NEWAPP-046",
+          "status": "queued",
+          "title": "Inquiry record list and revisions"
+        },
+        {
+          "id": "NEWAPP-047",
+          "status": "queued",
+          "title": "Local database model"
+        },
+        {
+          "id": "NEWAPP-048",
+          "status": "queued",
+          "title": "Mutation queue and idempotent push"
+        },
+        {
+          "id": "NEWAPP-049",
+          "status": "queued",
+          "title": "Change-feed pull"
+        },
+        {
+          "id": "NEWAPP-050",
+          "status": "queued",
+          "title": "Conflict resolution UI"
+        },
+        {
+          "id": "NEWAPP-051",
+          "status": "queued",
+          "title": "Offline E2E test suite"
+        },
+        {
+          "id": "NEWAPP-052",
+          "status": "queued",
+          "title": "Tenant theme tokens"
+        },
+        {
+          "id": "NEWAPP-053",
+          "status": "queued",
+          "title": "Dynamic fields"
+        },
+        {
+          "id": "NEWAPP-054",
+          "status": "queued",
+          "title": "Web admin control plane"
+        },
+        {
+          "id": "NEWAPP-055",
+          "status": "queued",
+          "title": "GPT agent tool registry"
+        },
+        {
+          "id": "NEWAPP-056",
+          "status": "queued",
+          "title": "Agent high-risk confirmation flow"
+        },
+        {
+          "id": "NEWAPP-057",
+          "status": "queued",
+          "title": "Agent mobile UI"
+        },
+        {
+          "id": "NEWAPP-058",
+          "status": "queued",
+          "title": "Error diagnosis assistant"
+        },
+        {
+          "id": "NEWAPP-059",
+          "status": "queued",
+          "title": "Verify cross-terminal master data immediacy"
+        },
+        {
+          "id": "NEWAPP-060",
+          "status": "queued",
+          "title": "Expose mobile inquiry data to NEWERP PC workflows"
+        },
+        {
+          "id": "NEWAPP-061",
+          "status": "queued",
+          "title": "Shared OSS image visibility across NEWERP and NEWAPP"
+        },
+        {
+          "id": "NEWAPP-062",
+          "status": "queued",
+          "title": "Shared dictionary and permission alignment"
+        },
+        {
+          "id": "NEWAPP-063",
+          "status": "queued",
+          "title": "Security hardening"
+        },
+        {
+          "id": "NEWAPP-064",
+          "status": "queued",
+          "title": "Performance and load testing"
+        },
+        {
+          "id": "NEWAPP-065",
+          "status": "queued",
+          "title": "Mobile visual regression matrix"
+        },
+        {
+          "id": "NEWAPP-066",
+          "status": "queued",
+          "title": "Release/update pipeline"
+        },
+        {
+          "id": "NEWAPP-067",
+          "status": "queued",
+          "title": "Final business-day acceptance test"
+        },
+        {
+          "id": "NEWAPP-068",
+          "status": "queued",
+          "title": "Freeze V1 and generate next backlog"
+        }
+      ]
+    },
+    "last_validation": {
+      "recorded": true,
+      "status": "passed",
+      "exit_code": 0,
+      "profile": "safe",
+      "step_count": 3,
+      "log": ".ai/logs/20260923T121241818265Z-4a51acee-validation.log"
+    },
+    "blockers": [
+      "active execution holds the queue: NEWAPP-006"
+    ],
+    "rolling_queue": {
+      "enabled": true,
+      "target_size": 4,
+      "idle_poll_seconds": 60,
+      "review_interval_minutes": 60,
+      "allow_unrelated_tasks_while_review_pending": true
+    },
+    "secret_safety": {
+      "environment_values_read_into_snapshot": false,
+      "environment_file": {
+        "path_label": ".env",
+        "content_recorded": false
+      },
+      "forbidden_key_name_patterns": [
+        "PASSWORD",
+        "SECRET",
+        "TOKEN",
+        "KEY",
+        "CONNECTIONSTRING",
+        "ACCESSKEY"
+      ],
+      "recorded_value_policy": "task ids, statuses, counts, repository-relative paths and hashes only"
+    }
+  },
+  "unresolved_issues": [
+    "The protected controller `status` command prints phase, current task, blockers and last validation from .ai/project_state.json but not Git facts; Git facts are printed by `preflight`. This helper collects them read-only. Adding them to `status` would require editing the protected path .ai/controller/agent_loop.py, so this executor reports the gap instead of editing it.",
+    ".ai/agent_config.yaml (protected) defines no validation.task_commands entry for NEWAPP-006, so controller `safe` validation runs compileall only. Wiring `{python} -m unittest discover -s tests/console -p test_*.py` into controller validation is a controller/GPT decision.",
+    ".github/workflows/** is a protected path, so the new console tests are not wired into CI by this task."
+  ],
+  "limitations": [
+    "Facts are point-in-time: branch, head commit, tracked-file count and queue state change while the rolling controller keeps running.",
+    "The secret-value check compares the generated snapshot text against values present in the local .env (4 characters or longer) and the reviewed NEWAPP-001 content rules; the whole-repository scan remains tests/baseline/secret_scan.py.",
+    "Behavioural checks are fixture based: they exercise the controller's own queue policy with synthetic states and never start a second controller or executor.",
+    "docs/CONSOLE_STATUS_CONTRACT.md restates no volatile value; it points at this artifact for branch, commit, counts and hashes."
+  ]
+}
